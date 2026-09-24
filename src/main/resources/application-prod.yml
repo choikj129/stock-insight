@@ -1,0 +1,11 @@
+# 운영: 접속 정보는 환경 변수로만 주입한다 (값은 SSM Parameter Store에서 가져온다).
+# 값이 없으면 기동에 실패하도록 기본값을 두지 않는다.
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+app:
+  scheduler:
+    enabled: true

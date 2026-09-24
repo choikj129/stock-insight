@@ -1,0 +1,46 @@
+# 모든 환경 공통 설정. 환경별 값은 application-{profile}.yml에 둔다.
+spring:
+  application:
+    name: stockInsight
+  threads:
+    virtual:
+      enabled: true
+  jpa:
+    open-in-view: false
+    hibernate:
+      # 스키마는 Flyway만 관리한다.
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          # 시각은 UTC로 저장한다 (docs/architecture.md §4.3).
+          time_zone: UTC
+  flyway:
+    locations: classpath:db/migration
+
+app:
+  scheduler:
+    enabled: false
+  dart:
+    api-key: ${DART_API_KEY:}
+    base-url: https://opendart.fss.or.kr/api
+    min-interval: 200ms
+    connect-timeout: 5s
+    # 고유번호 파일(zip)은 수 MB이므로 넉넉히 둔다.
+    read-timeout: 60s
+    max-attempts: 3
+    retry-backoff: 2s
+  ingest:
+    company-sync:
+      cron: "0 0 5 * * *"
+      run-on-startup: false
+      max-calls-per-run: 10000
+      refresh-after: 30d
+      min-listed-count: 1000
+      max-delisted-ratio: 0.1
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health

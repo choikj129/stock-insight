@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<result>
+    <list>
+        <corp_code>00126380</corp_code>
+        <corp_name>삼성전자(주)</corp_name>
+        <corp_eng_name>SAMSUNG ELECTRONICS CO,.LTD</corp_eng_name>
+        <stock_code>005930</stock_code>
+        <modify_date>20250101</modify_date>
+    </list>
+    <list>
+        <corp_code>00434003</corp_code>
+        <corp_name>다코</corp_name>
+        <corp_eng_name>Daco corporation</corp_eng_name>
+        <stock_code> </stock_code>
+        <modify_date>20170630</modify_date>
+    </list>
+    <list>
+        <corp_code>01571107</corp_code>
+        <corp_name>(주)신규상장테크</corp_name>
+        <corp_eng_name>New Listing Tech</corp_eng_name>
+        <stock_code>0010V0</stock_code>
+        <modify_date>20260801</modify_date>
+    </list>
+</result>

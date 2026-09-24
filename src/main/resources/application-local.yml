@@ -1,0 +1,6 @@
+# 로컬 개발: compose.yaml의 PostgreSQL을 사용한다.
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/stockinsight
+    username: stockinsight
+    password: stockinsight
