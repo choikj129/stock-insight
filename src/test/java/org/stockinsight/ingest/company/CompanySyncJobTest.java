@@ -38,6 +38,7 @@ import org.stockinsight.ingest.dart.DartApiException;
 import org.stockinsight.ingest.dart.DartCompanyOverview;
 import org.stockinsight.ingest.dart.DartCorpCode;
 import org.stockinsight.ingest.dart.DartDisclosurePage;
+import org.stockinsight.ingest.dart.DartKeyAccount;
 import org.stockinsight.ingest.dart.DartStatus;
 
 /**
@@ -278,6 +279,11 @@ class CompanySyncJobTest {
         @Override
         public DartDisclosurePage fetchDisclosures(LocalDate receivedOn, String disclosureType, int pageNo) {
             throw new UnsupportedOperationException("기업 목록 동기화는 공시 목록을 읽지 않는다");
+        }
+
+        @Override
+        public List<DartKeyAccount> fetchKeyAccounts(List<String> corpCodes, int bsnsYear, String reportCode) {
+            throw new UnsupportedOperationException("기업 목록 동기화는 재무 정보를 읽지 않는다");
         }
     }
 

@@ -46,6 +46,13 @@ app:
       # 초기 적재 3년 ≈ 3,300일·유형 + 추가 페이지. 두어 번의 실행에 나눠 받는다.
       max-calls-per-run: 3000
       initial-load-period: 3y
+    financial-sync:
+      # 공시 목록 수집(06:00) 뒤 하루 한 번. 장중에는 하지 않는다.
+      cron: "0 30 6 * * *"
+      run-on-startup: false
+      max-calls-per-run: 500
+      # 올해 포함 4개 bsns_year(올해, 올해-1, 올해-2, 올해-3) × 4개 보고서 종류.
+      initial-load-years: 3
 
 management:
   endpoints:

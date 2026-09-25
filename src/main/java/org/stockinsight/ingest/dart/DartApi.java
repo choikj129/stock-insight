@@ -23,4 +23,11 @@ public interface DartApi {
      * @param disclosureType OpenDART 공시유형 코드 (A: 정기공시, B: 주요사항보고, I: 거래소공시 등)
      */
     DartDisclosurePage fetchDisclosures(LocalDate receivedOn, String disclosureType, int pageNo);
+
+    /**
+     * 다중회사 주요계정(fnlttMultiAcnt.json). corpCodes는 최대 100개. 데이터가 없으면(013) 빈 목록.
+     *
+     * @param reportCode 11013(1분기), 11012(반기), 11014(3분기), 11011(사업보고서)
+     */
+    List<DartKeyAccount> fetchKeyAccounts(List<String> corpCodes, int bsnsYear, String reportCode);
 }

@@ -3,6 +3,7 @@ package org.stockinsight.company;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -86,6 +87,19 @@ public class CompanyService {
         return companies.findAllByStatus(CompanyStatus.ACTIVE).stream()
                 .filter(company -> company.getDartCorpCode() != null)
                 .collect(Collectors.toMap(Company::getDartCorpCode, Company::getId));
+    }
+
+    /**
+     * 대상 종목 범위(ACTIVE) 기업 ID → 결산월. 재무 수집이 분기보고서의 1·3분기를 판별할 때 쓴다.
+     * 값이 없는 기업(결산월 미상)은 null로 담긴다.
+     */
+    @Transactional(readOnly = true)
+    public Map<Long, Integer> activeFiscalMonthsByCompanyId() {
+        Map<Long, Integer> result = new HashMap<>();
+        for (Company company : companies.findAllByStatus(CompanyStatus.ACTIVE)) {
+            result.put(company.getId(), company.getFiscalMonth());
+        }
+        return result;
     }
 
     @Transactional(readOnly = true)

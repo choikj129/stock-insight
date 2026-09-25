@@ -36,6 +36,9 @@ public class DartClient implements DartApi {
     /** 공시검색의 페이지당 최대 건수. */
     static final int DISCLOSURE_PAGE_SIZE = 100;
 
+    /** 다중회사 주요계정 한 호출의 최대 기업 수. */
+    static final int MAX_KEY_ACCOUNT_CORP_CODES = 100;
+
     private final RestClient restClient;
     private final DartProperties properties;
     private final RequestPacer pacer;
@@ -114,6 +117,32 @@ public class DartClient implements DartApi {
             return DartDisclosurePage.empty(pageNo);
         }
         throw toException(page.status(), page.message(), request);
+    }
+
+    @Override
+    public List<DartKeyAccount> fetchKeyAccounts(List<String> corpCodes, int bsnsYear, String reportCode) {
+        if (corpCodes.isEmpty() || corpCodes.size() > MAX_KEY_ACCOUNT_CORP_CODES) {
+            throw new IllegalArgumentException("corpCodes는 1~%d개여야 합니다: %d개".formatted(MAX_KEY_ACCOUNT_CORP_CODES, corpCodes.size()));
+        }
+        String request = "fnlttMultiAcnt.json " + bsnsYear + " " + reportCode + " " + corpCodes.size() + "개사";
+        byte[] body = get("/fnlttMultiAcnt.json", Map.of(
+                "corp_code", String.join(",", corpCodes),
+                "bsns_year", String.valueOf(bsnsYear),
+                "reprt_code", reportCode));
+        DartKeyAccountResponse response;
+        try {
+            response = jsonMapper.readValue(body, DartKeyAccountResponse.class);
+        } catch (JacksonException e) {
+            throw new DartApiException(DartStatus.UNEXPECTED_RESPONSE, "주요계정 응답을 읽지 못했습니다: " + request);
+        }
+        DartStatus status = DartStatus.fromCode(response.status());
+        if (status == DartStatus.SUCCESS) {
+            return response.list();
+        }
+        if (status == DartStatus.NO_DATA) {
+            return List.of();
+        }
+        throw toException(response.status(), response.message(), request);
     }
 
     private byte[] get(String path, Map<String, String> params) {

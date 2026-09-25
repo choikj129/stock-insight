@@ -41,6 +41,7 @@ import org.stockinsight.ingest.dart.DartCompanyOverview;
 import org.stockinsight.ingest.dart.DartCorpCode;
 import org.stockinsight.ingest.dart.DartDisclosure;
 import org.stockinsight.ingest.dart.DartDisclosurePage;
+import org.stockinsight.ingest.dart.DartKeyAccount;
 import org.stockinsight.ingest.dart.DartStatus;
 
 /**
@@ -314,6 +315,11 @@ class DisclosureSyncJobTest {
         @Override
         public Optional<DartCompanyOverview> fetchCompany(String corpCode) {
             throw new UnsupportedOperationException("공시 목록 수집은 기업개황을 읽지 않는다");
+        }
+
+        @Override
+        public List<DartKeyAccount> fetchKeyAccounts(List<String> corpCodes, int bsnsYear, String reportCode) {
+            throw new UnsupportedOperationException("공시 목록 수집은 재무 정보를 읽지 않는다");
         }
     }
 

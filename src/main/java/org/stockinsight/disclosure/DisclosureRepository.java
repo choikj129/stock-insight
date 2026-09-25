@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -88,6 +89,22 @@ class DisclosureRepository {
                 .param("companyIds", companyIds)
                 .param("now", Timestamp.from(now))
                 .update();
+    }
+
+    /**
+     * 기업·기본 보고서명별 가장 큰 공시번호(정기공시만). 재무 수집이 다시 받을 대상을 정하는 계기다.
+     * 같은 기간의 원 공시와 정정을 모두 포함해서 고른다.
+     */
+    List<PeriodicTrigger> latestPeriodicByCompanyAndBaseName() {
+        return jdbc.sql("""
+                        select company_id, base_report_name, max(receipt_no) as receipt_no
+                          from disclosure
+                         where disclosure_type = 'PERIODIC'
+                         group by company_id, base_report_name
+                        """)
+                .query((rs, rowNum) -> new PeriodicTrigger(
+                        rs.getLong("company_id"), rs.getString("base_report_name"), rs.getString("receipt_no")))
+                .list();
     }
 
     Optional<Disclosure> findByReceiptNo(String receiptNo) {

@@ -17,6 +17,7 @@ import java.io.InputStream;
 import java.net.SocketTimeoutException;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.zip.ZipEntry;
@@ -221,6 +222,71 @@ class DartClientTest {
         assertThatThrownBy(() -> withoutKey.fetchCompany("00126380"))
                 .isInstanceOfSatisfying(DartApiException.class,
                         e -> assertThat(e.status()).isEqualTo(DartStatus.MISSING_KEY));
+    }
+
+    @Test
+    void readsKeyAccountsForMultipleCompaniesAndFsDiv() {
+        server.expect(requestTo(startsWith(BASE_URL + "/fnlttMultiAcnt.json")))
+                .andExpect(queryParam("corp_code", "00126380,00241209,00139685,00688996"))
+                .andExpect(queryParam("bsns_year", "2025"))
+                .andExpect(queryParam("reprt_code", "11012"))
+                .andExpect(queryParam("crtfc_key", API_KEY))
+                .andRespond(withSuccess(fixture("fnlttMultiAcnt-2025-11012.json"), MediaType.APPLICATION_JSON));
+
+        List<DartKeyAccount> rows = client.fetchKeyAccounts(
+                List.of("00126380", "00241209", "00139685", "00688996"), 2025, "11012");
+
+        assertThat(rows).extracting(DartKeyAccount::corpCode).contains("00126380", "00241209", "00139685", "00688996");
+        assertThat(rows).extracting(DartKeyAccount::fsDiv).containsOnly("CFS", "OFS");
+        // 재무상태표는 thstrm_dt가 기간이 아니라 시점("현재")이고, thstrm_add_amount가 없다.
+        assertThat(rows).filteredOn(r -> r.corpCode().equals("00126380") && "BS".equals(r.statement()) && "5".equals(r.ord()))
+                .first()
+                .satisfies(row -> {
+                    assertThat(row.currentPeriod()).contains("현재");
+                    assertThat(row.currentCumulativeAmount()).isNull();
+                });
+        // 6월 결산 양지사: 금액 "-"와 당기순이익 중복 ord(별도 30·62)가 실제 응답에 있다.
+        assertThat(rows).filteredOn(r -> r.corpCode().equals("00139685"))
+                .anySatisfy(row -> assertThat(row.priorAmount()).isEqualTo("-"))
+                .extracting(DartKeyAccount::ord)
+                .contains("30", "62");
+        // KB금융(금융형): "영업이익(손실)" 이름과 이자수익 같은 금융업 전용 계정이 온다.
+        assertThat(rows).filteredOn(r -> r.corpCode().equals("00688996"))
+                .extracting(DartKeyAccount::accountName)
+                .contains("영업이익(손실)", "이자수익", "예수부채");
+        server.verify();
+    }
+
+    @Test
+    void annualReportIncludesThirdPriorPeriodAndReflectsLatestAmendment() {
+        server.expect(requestTo(startsWith(BASE_URL + "/fnlttMultiAcnt.json")))
+                .andRespond(withSuccess(fixture("fnlttMultiAcnt-2025-11011.json"), MediaType.APPLICATION_JSON));
+
+        List<DartKeyAccount> rows = client.fetchKeyAccounts(List.of("00126380", "00163196"), 2025, "11011");
+
+        assertThat(rows).filteredOn(r -> r.corpCode().equals("00126380") && "23".equals(r.ord()))
+                .first()
+                .satisfies(row -> assertThat(row.prior2Amount()).isEqualTo("258,935,494,000,000"));
+        // 실제 사례: 정정된 보고서는 최신 정정 공시번호([기재정정])로 온다.
+        assertThat(rows).filteredOn(r -> r.corpCode().equals("00163196"))
+                .extracting(DartKeyAccount::receiptNo)
+                .containsOnly("20260806000290");
+    }
+
+    @Test
+    void keyAccountsReturnsEmptyListWhenNoData() {
+        server.expect(requestTo(startsWith(BASE_URL + "/fnlttMultiAcnt.json")))
+                .andRespond(withSuccess(fixture("fnlttMultiAcnt-error-013.json"), MediaType.APPLICATION_JSON));
+
+        assertThat(client.fetchKeyAccounts(List.of("00126380"), 2030, "11011")).isEmpty();
+    }
+
+    @Test
+    void rejectsCorpCodeListOutsideOneToOneHundred() {
+        assertThatThrownBy(() -> client.fetchKeyAccounts(List.of(), 2025, "11012"))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> client.fetchKeyAccounts(Collections.nCopies(101, "00126380"), 2025, "11012"))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test

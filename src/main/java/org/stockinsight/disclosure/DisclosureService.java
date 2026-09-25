@@ -52,6 +52,12 @@ public class DisclosureService {
         return disclosures.findByReceiptNo(receiptNo);
     }
 
+    /** 재무 수집이 다시 받을 대상을 정하는 계기(정기공시). 기업·기본 보고서명별 가장 큰 공시번호다. */
+    @Transactional(readOnly = true)
+    public List<PeriodicTrigger> latestPeriodicTriggers() {
+        return disclosures.latestPeriodicByCompanyAndBaseName();
+    }
+
     /** 수집한 공시 한 건. */
     public record NewDisclosure(
             String receiptNo,
