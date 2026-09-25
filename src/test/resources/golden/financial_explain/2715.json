@@ -1,0 +1,171 @@
+{
+  "company" : {
+    "name" : "셀레스트라",
+    "format" : "GENERAL",
+    "currency" : "KRW",
+    "basis" : "CFS",
+    "fiscalYearEndMonth" : 12
+  },
+  "latest" : {
+    "period" : "2026-01.Q2",
+    "kind" : "QUARTER"
+  },
+  "changeStatus" : "NONE",
+  "sections" : [ "overview", "sales_profit", "history" ],
+  "periods" : [ {
+    "key" : "2026-01.Q2",
+    "label" : "2026년 2분기"
+  }, {
+    "key" : "2025-01.Q4",
+    "label" : "2025년(연간)"
+  } ],
+  "facts" : [ {
+    "key" : "fin.operating_income.2026-01.Q2",
+    "name" : "영업이익",
+    "display" : "-4.5억원",
+    "sign" : "-",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.operating_income_prior.2026-01.Q2",
+    "name" : "영업이익(전년 동기)",
+    "display" : "-28.4억원",
+    "sign" : "-",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.net_income.2026-01.Q2",
+    "name" : "당기순이익",
+    "display" : "-4.4억원",
+    "sign" : "-",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.net_income_prior.2026-01.Q2",
+    "name" : "당기순이익(전년 동기)",
+    "display" : "-5.2억원",
+    "sign" : "-",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.revenue.2025-01.Q4",
+    "name" : "매출액",
+    "display" : "20.1억원",
+    "sign" : "+",
+    "period" : "2025-01.Q4"
+  }, {
+    "key" : "fin.revenue_yoy.2025-01.Q4",
+    "name" : "매출 증가율(전기 대비)",
+    "display" : "-76.4%",
+    "sign" : "-",
+    "period" : "2025-01.Q4"
+  }, {
+    "key" : "fin.operating_income.2025-01.Q4",
+    "name" : "영업이익",
+    "display" : "-77.6억원",
+    "sign" : "-",
+    "period" : "2025-01.Q4"
+  }, {
+    "key" : "fin.operating_margin.2025-01.Q4",
+    "name" : "영업이익률",
+    "display" : "-386.5%",
+    "sign" : "-",
+    "period" : "2025-01.Q4"
+  }, {
+    "key" : "fin.net_income.2025-01.Q4",
+    "name" : "당기순이익",
+    "display" : "-117.7억원",
+    "sign" : "-",
+    "period" : "2025-01.Q4"
+  }, {
+    "key" : "fin.operating_loss_run.2026-01.Q2",
+    "name" : "연속 영업적자 분기 수",
+    "display" : "2분기",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  } ],
+  "signals" : [ {
+    "ref" : "S1",
+    "type" : "FIN_REVENUE_CHANGE",
+    "status" : "PAST",
+    "nature" : "CHANGE",
+    "direction" : "NEGATIVE",
+    "severity" : "HIGH",
+    "period" : "2025-01.Q4",
+    "persistence" : null,
+    "factKeys" : [ "fin.revenue.2025-01.Q4", "fin.revenue_yoy.2025-01.Q4" ]
+  }, {
+    "ref" : "S2",
+    "type" : "FIN_OPERATING_MARGIN_CHANGE",
+    "status" : "PAST",
+    "nature" : "CHANGE",
+    "direction" : "POSITIVE",
+    "severity" : "HIGH",
+    "period" : "2025-01.Q3",
+    "persistence" : null,
+    "factKeys" : [ ]
+  }, {
+    "ref" : "S3",
+    "type" : "FIN_CAPITAL_IMPAIRMENT",
+    "status" : "PAST",
+    "nature" : "STATE",
+    "direction" : "NEGATIVE",
+    "severity" : "HIGH",
+    "period" : "2025-01.Q2",
+    "persistence" : 4,
+    "factKeys" : [ ]
+  }, {
+    "ref" : "S4",
+    "type" : "FIN_OPERATING_MARGIN_CHANGE",
+    "status" : "PAST",
+    "nature" : "CHANGE",
+    "direction" : "POSITIVE",
+    "severity" : "HIGH",
+    "period" : "2025-01.Q2",
+    "persistence" : null,
+    "factKeys" : [ ]
+  } ],
+  "groups" : [ {
+    "period" : "2025-01.Q4",
+    "topic" : "SALES_PROFIT",
+    "refs" : [ "S1" ],
+    "mixedDirection" : false
+  }, {
+    "period" : "2025-01.Q3",
+    "topic" : "SALES_PROFIT",
+    "refs" : [ "S2" ],
+    "mixedDirection" : false
+  }, {
+    "period" : "2025-01.Q2",
+    "topic" : "STRUCTURE",
+    "refs" : [ "S3" ],
+    "mixedDirection" : false
+  }, {
+    "period" : "2025-01.Q2",
+    "topic" : "SALES_PROFIT",
+    "refs" : [ "S4" ],
+    "mixedDirection" : false
+  } ],
+  "unavailable" : [ {
+    "metric" : "revenue",
+    "reason" : "ACCOUNT_MISSING"
+  }, {
+    "metric" : "operating_margin",
+    "reason" : "ACCOUNT_MISSING"
+  }, {
+    "metric" : "total_assets",
+    "reason" : "INCONSISTENT_BALANCE"
+  }, {
+    "metric" : "total_liabilities",
+    "reason" : "INCONSISTENT_BALANCE"
+  }, {
+    "metric" : "total_equity",
+    "reason" : "INCONSISTENT_BALANCE"
+  }, {
+    "metric" : "capital_stock",
+    "reason" : "INCONSISTENT_BALANCE"
+  }, {
+    "metric" : "debt_ratio",
+    "reason" : "INCONSISTENT_BALANCE"
+  }, {
+    "metric" : "impairment_ratio",
+    "reason" : "INCONSISTENT_BALANCE"
+  } ],
+  "doNotMention" : [ ]
+}

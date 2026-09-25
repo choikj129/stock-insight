@@ -1,7 +1,6 @@
 package org.stockinsight.signal;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -11,6 +10,7 @@ import java.util.Optional;
 
 import org.stockinsight.financial.AnnualEntry;
 import org.stockinsight.financial.FinancialFormat;
+import org.stockinsight.financial.FinancialRatios;
 import org.stockinsight.financial.FinancialSummary;
 import org.stockinsight.financial.MetricValue;
 import org.stockinsight.financial.PeriodKey;
@@ -25,9 +25,6 @@ public final class FinancialSignalCalculator {
 
     static final String RULE_VERSION = FinancialRuleCatalog.RULE_VERSION;
     private static final String KRW = "KRW";
-    /** 분기 사이 간격 판단 허용 범위(일). 이 범위를 벗어나면 빈 기간(연속 끊김)으로 본다. */
-    private static final int MIN_QUARTER_GAP_DAYS = 45;
-    private static final int MAX_QUARTER_GAP_DAYS = 135;
 
     private FinancialSignalCalculator() {
     }
@@ -187,8 +184,8 @@ public final class FinancialSignalCalculator {
                         || q.totalEquity().prior().signum() <= 0) {
                     continue;
                 }
-                BigDecimal ratio = percentOf(q.totalLiabilities().current(), q.totalEquity().current());
-                BigDecimal priorRatio = percentOf(q.totalLiabilities().prior(), q.totalEquity().prior());
+                BigDecimal ratio = FinancialRatios.debtRatio(q.totalLiabilities().current(), q.totalEquity().current());
+                BigDecimal priorRatio = FinancialRatios.debtRatio(q.totalLiabilities().prior(), q.totalEquity().prior());
                 BigDecimal diff = ratio.subtract(priorRatio);
                 if (ratio.compareTo(FinancialRuleCatalog.DEBT_RATIO_LEVEL) < 0
                         || diff.compareTo(FinancialRuleCatalog.DEBT_RATIO_JUMP) < 0) {
@@ -287,14 +284,9 @@ public final class FinancialSignalCalculator {
         QuarterEntry end = streak.get(streak.size() - 1);
         BigDecimal equity = end.totalEquity().current();
         BigDecimal capital = end.capitalStock().current();
-        SignalSeverity severity;
-        BigDecimal ratio = null;
-        if (equity.signum() <= 0) {
-            severity = SignalSeverity.HIGH;
-        } else {
-            ratio = capital.subtract(equity).divide(capital, 6, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100));
-            severity = ratio.compareTo(FinancialRuleCatalog.IMPAIRMENT_RATIO_HIGH) >= 0 ? SignalSeverity.HIGH : SignalSeverity.MEDIUM;
-        }
+        BigDecimal ratio = FinancialRatios.impairmentRatio(capital, equity);
+        SignalSeverity severity = equity.signum() <= 0 || (ratio != null && ratio.compareTo(FinancialRuleCatalog.IMPAIRMENT_RATIO_HIGH) >= 0)
+                ? SignalSeverity.HIGH : SignalSeverity.MEDIUM;
         Map<String, Object> calc = new LinkedHashMap<>();
         calc.put("totalEquity", equity);
         calc.put("capitalStock", capital);
@@ -360,23 +352,15 @@ public final class FinancialSignalCalculator {
 
     /** 두 분기가 바로 이어지는가(약 1분기 간격). 벗어나면 빈 기간이다. */
     private static boolean isConsecutive(QuarterEntry earlier, QuarterEntry later) {
-        long days = java.time.temporal.ChronoUnit.DAYS.between(earlier.periodEnd(), later.periodEnd());
-        return days >= MIN_QUARTER_GAP_DAYS && days <= MAX_QUARTER_GAP_DAYS;
+        return FinancialRatios.isConsecutiveQuarter(earlier.periodEnd(), later.periodEnd());
     }
 
     private static BigDecimal percentChange(BigDecimal current, BigDecimal prior) {
-        return current.subtract(prior).divide(prior, 6, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100));
-    }
-
-    private static BigDecimal percentOf(BigDecimal numerator, BigDecimal denominator) {
-        return numerator.divide(denominator, 6, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100));
+        return FinancialRatios.percentChange(current, prior);
     }
 
     private static BigDecimal margin(BigDecimal revenue, BigDecimal operatingIncome) {
-        if (revenue == null || operatingIncome == null || revenue.signum() <= 0) {
-            return null;
-        }
-        return percentOf(operatingIncome, revenue);
+        return FinancialRatios.margin(revenue, operatingIncome);
     }
 
     private static Map<String, Object> calcValues(FlowPeriod p, String changeKey, BigDecimal changeValue) {

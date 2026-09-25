@@ -2,18 +2,21 @@ package org.stockinsight.signal;
 
 import java.math.BigDecimal;
 
+import org.stockinsight.financial.FinancialRatios;
+
 /**
  * 재무 신호 판정 문턱값·심각도 구간 (D-35, ai-analysis.md §3.7). 초기값의 근거는 2026-09-25 로컬 데이터 분포다
  * (implementation-plan.md §6.1·§6.3). 값을 바꾸면 {@link #RULE_VERSION}도 올린다.
+ * 매출 기준값은 재무 쉬운 설명(`analysis`)의 사실표 계산과 같은 값을 쓰도록 {@link FinancialRatios}를 참조한다(한 곳에서 정의, implementation-plan.md §7.2).
  */
-final class FinancialRuleCatalog {
+public final class FinancialRuleCatalog {
 
-    /** 규칙 버전. 바뀌면 모든 기업을 다시 판정한다. */
-    static final String RULE_VERSION = "fin-1";
+    /** 규칙 버전. 바뀌면 모든 기업을 다시 판정한다. {@code analysis} 패키지가 입력 신호의 규칙 버전으로 참조한다. */
+    public static final String RULE_VERSION = "fin-1";
 
     /** 매출 비교 기준값: 분기 10억, 연간 40억 (미만이면 증가율을 계산하지 않는다). */
-    static final BigDecimal REVENUE_BASE_QUARTER = new BigDecimal("1000000000");
-    static final BigDecimal REVENUE_BASE_ANNUAL = new BigDecimal("4000000000");
+    static final BigDecimal REVENUE_BASE_QUARTER = FinancialRatios.REVENUE_BASE_QUARTER;
+    static final BigDecimal REVENUE_BASE_ANNUAL = FinancialRatios.REVENUE_BASE_ANNUAL;
 
     /** 매출 증가율 문턱값(%). */
     static final BigDecimal REVENUE_UP_THRESHOLD = new BigDecimal("30");
@@ -49,9 +52,6 @@ final class FinancialRuleCatalog {
 
     /** 데이터 이력이 이 분기 수 미만이면 "재무 이력 부족". */
     static final int MIN_HISTORY_QUARTERS = 4;
-
-    /** 재무상태표 항등식 허용 오차(비율). */
-    static final BigDecimal BALANCE_TOLERANCE = new BigDecimal("0.005");
 
     /** 다음 보고서 제출 기한: 분기·반기 45일, 사업보고서 90일. 이 값에 +7일을 더해 "미확인" 기준으로 쓴다. */
     static final int QUARTERLY_DEADLINE_DAYS = 45;

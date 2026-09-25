@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "properties": {
+    "overview": {
+      "type": "string",
+      "description": "최신 기간의 한 줄 상태와 변화 유무. 항상 채운다."
+    },
+    "sales_profit": {
+      "type": ["string", "null"],
+      "description": "손익 설명. sections에 없으면 null."
+    },
+    "structure": {
+      "type": ["string", "null"],
+      "description": "재무상태 설명. sections에 없으면 null."
+    },
+    "history": {
+      "type": ["string", "null"],
+      "description": "이력 신호·흐름 설명. sections에 없으면 null."
+    }
+  },
+  "required": ["overview", "sales_profit", "structure", "history"],
+  "additionalProperties": false
+}

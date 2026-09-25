@@ -27,7 +27,6 @@ public class FinancialSummaryService {
     private static final int QUARTER_WINDOW = 12;
     private static final int ANNUAL_WINDOW = 3;
     private static final String KRW = "KRW";
-    private static final double BALANCE_TOLERANCE = 0.005;
 
     private final FinancialRepository repository;
 
@@ -196,16 +195,7 @@ public class FinancialSummaryService {
 
     /** 자산총계 = 부채총계 + 자본총계 (차이 0.5% 이내, ai-analysis.md §3.6). 값이 없으면 점검하지 않는다(일치로 본다). */
     private static boolean isBalanceConsistent(MappedAccounts accounts) {
-        BigDecimal assets = accounts.totalAssets().current();
-        BigDecimal liabilities = accounts.totalLiabilities().current();
-        BigDecimal equity = accounts.totalEquity().current();
-        if (assets == null || liabilities == null || equity == null) {
-            return true;
-        }
-        BigDecimal expected = liabilities.add(equity);
-        BigDecimal diff = assets.subtract(expected).abs();
-        BigDecimal tolerance = assets.abs().max(BigDecimal.ONE)
-                .multiply(BigDecimal.valueOf(BALANCE_TOLERANCE));
-        return diff.compareTo(tolerance) <= 0;
+        return FinancialRatios.isBalanceConsistent(accounts.totalAssets().current(),
+                accounts.totalLiabilities().current(), accounts.totalEquity().current());
     }
 }

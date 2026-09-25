@@ -58,6 +58,26 @@ app:
       # 재무 수집(06:30) 뒤 하루 한 번.
       cron: "0 0 7 * * *"
       run-on-startup: false
+  analysis:
+    financial-explain:
+      # 재무 신호 계산(07:00) 뒤.
+      cron: "0 30 7 * * *"
+      run-on-startup: false
+      golden-set-company-ids: []
+      daily-budget-usd: 5
+      monthly-budget-usd: 60
+      # 골든셋 검토를 통과하기 전까지는 초안으로만 저장한다(D-39, ai-analysis.md §4.4.8).
+      publish: false
+  llm:
+    api-key: ${ANTHROPIC_API_KEY:}
+    model: claude-sonnet-5
+    max-tokens: 2000
+    timeout: 60s
+    max-retries: 2
+    # ai-analysis.md §9 (2026-06 기준, 100만 토큰당 USD).
+    input-cost-per-million: 2
+    cache-read-cost-per-million: 0.2
+    output-cost-per-million: 10
 
 management:
   endpoints:

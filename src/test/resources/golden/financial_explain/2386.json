@@ -1,0 +1,117 @@
+{
+  "company" : {
+    "name" : "삼성에피스홀딩스",
+    "format" : "GENERAL",
+    "currency" : "KRW",
+    "basis" : "CFS",
+    "fiscalYearEndMonth" : 12
+  },
+  "latest" : {
+    "period" : "2026-01.Q2",
+    "kind" : "QUARTER"
+  },
+  "changeStatus" : "NONE",
+  "sections" : [ "overview", "sales_profit", "structure" ],
+  "periods" : [ {
+    "key" : "2026-01.Q2",
+    "label" : "2026년 2분기"
+  }, {
+    "key" : "2025-11.Q4",
+    "label" : "2025년(연간)"
+  } ],
+  "facts" : [ {
+    "key" : "fin.revenue.2026-01.Q2",
+    "name" : "매출액",
+    "display" : "3918.9억원",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.operating_income.2026-01.Q2",
+    "name" : "영업이익",
+    "display" : "587.4억원",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.operating_margin.2026-01.Q2",
+    "name" : "영업이익률",
+    "display" : "+15.0%",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.net_income.2026-01.Q2",
+    "name" : "당기순이익",
+    "display" : "858.1억원",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.revenue.2025-11.Q4",
+    "name" : "매출액",
+    "display" : "2516.9억원",
+    "sign" : "+",
+    "period" : "2025-11.Q4"
+  }, {
+    "key" : "fin.operating_income.2025-11.Q4",
+    "name" : "영업이익",
+    "display" : "-636.4억원",
+    "sign" : "-",
+    "period" : "2025-11.Q4"
+  }, {
+    "key" : "fin.operating_margin.2025-11.Q4",
+    "name" : "영업이익률",
+    "display" : "-25.3%",
+    "sign" : "-",
+    "period" : "2025-11.Q4"
+  }, {
+    "key" : "fin.net_income.2025-11.Q4",
+    "name" : "당기순이익",
+    "display" : "853.1억원",
+    "sign" : "+",
+    "period" : "2025-11.Q4"
+  }, {
+    "key" : "fin.total_assets.2026-01.Q2",
+    "name" : "자산총계",
+    "display" : "8.0조원",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.total_liabilities.2026-01.Q2",
+    "name" : "부채총계",
+    "display" : "1.9조원",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.total_equity.2026-01.Q2",
+    "name" : "자본총계",
+    "display" : "6.1조원",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.capital_stock.2026-01.Q2",
+    "name" : "자본금",
+    "display" : "622.1억원",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.debt_ratio.2026-01.Q2",
+    "name" : "부채비율",
+    "display" : "+31.4%",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.debt_ratio_prior_end.2026-01.Q2",
+    "name" : "부채비율(전기말)",
+    "display" : "+30.6%",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.debt_ratio_diff.2026-01.Q2",
+    "name" : "부채비율 변화",
+    "display" : "+0.8%p",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  } ],
+  "signals" : [ ],
+  "groups" : [ ],
+  "unavailable" : [ ],
+  "doNotMention" : [ ]
+}

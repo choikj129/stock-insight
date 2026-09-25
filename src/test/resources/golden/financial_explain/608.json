@@ -1,0 +1,156 @@
+{
+  "company" : {
+    "name" : "GRT",
+    "format" : "GENERAL",
+    "currency" : "CNY",
+    "basis" : "CFS",
+    "fiscalYearEndMonth" : 6
+  },
+  "latest" : {
+    "period" : "2025-07.Q3",
+    "kind" : "QUARTER"
+  },
+  "changeStatus" : "NONE",
+  "sections" : [ "overview", "sales_profit", "structure", "history" ],
+  "periods" : [ {
+    "key" : "2025-07.Q3",
+    "label" : "2026.01~03(3분기)"
+  }, {
+    "key" : "2024-07.Q4",
+    "label" : "2024.07~2025.06 회계연도"
+  } ],
+  "facts" : [ {
+    "key" : "fin.revenue.2025-07.Q3",
+    "name" : "매출액",
+    "display" : "1366952305CNY",
+    "sign" : "+",
+    "period" : "2025-07.Q3"
+  }, {
+    "key" : "fin.revenue_prior.2025-07.Q3",
+    "name" : "매출액(전년 동기)",
+    "display" : "1070464168CNY",
+    "sign" : "+",
+    "period" : "2025-07.Q3"
+  }, {
+    "key" : "fin.operating_income.2025-07.Q3",
+    "name" : "영업이익",
+    "display" : "205331064CNY",
+    "sign" : "+",
+    "period" : "2025-07.Q3"
+  }, {
+    "key" : "fin.operating_income_prior.2025-07.Q3",
+    "name" : "영업이익(전년 동기)",
+    "display" : "144732140CNY",
+    "sign" : "+",
+    "period" : "2025-07.Q3"
+  }, {
+    "key" : "fin.operating_margin.2025-07.Q3",
+    "name" : "영업이익률",
+    "display" : "+15.0%",
+    "sign" : "+",
+    "period" : "2025-07.Q3"
+  }, {
+    "key" : "fin.operating_margin_prior.2025-07.Q3",
+    "name" : "영업이익률(전년 동기)",
+    "display" : "+13.5%",
+    "sign" : "+",
+    "period" : "2025-07.Q3"
+  }, {
+    "key" : "fin.operating_margin_diff.2025-07.Q3",
+    "name" : "영업이익률 변화",
+    "display" : "+1.5%p",
+    "sign" : "+",
+    "period" : "2025-07.Q3"
+  }, {
+    "key" : "fin.net_income.2025-07.Q3",
+    "name" : "당기순이익",
+    "display" : "139545684CNY",
+    "sign" : "+",
+    "period" : "2025-07.Q3"
+  }, {
+    "key" : "fin.net_income_prior.2025-07.Q3",
+    "name" : "당기순이익(전년 동기)",
+    "display" : "117646504CNY",
+    "sign" : "+",
+    "period" : "2025-07.Q3"
+  }, {
+    "key" : "fin.revenue.2024-07.Q4",
+    "name" : "매출액",
+    "display" : "4943342767CNY",
+    "sign" : "+",
+    "period" : "2024-07.Q4"
+  }, {
+    "key" : "fin.operating_income.2024-07.Q4",
+    "name" : "영업이익",
+    "display" : "707629590CNY",
+    "sign" : "+",
+    "period" : "2024-07.Q4"
+  }, {
+    "key" : "fin.operating_margin.2024-07.Q4",
+    "name" : "영업이익률",
+    "display" : "+14.3%",
+    "sign" : "+",
+    "period" : "2024-07.Q4"
+  }, {
+    "key" : "fin.net_income.2024-07.Q4",
+    "name" : "당기순이익",
+    "display" : "495934973CNY",
+    "sign" : "+",
+    "period" : "2024-07.Q4"
+  }, {
+    "key" : "fin.total_assets.2025-07.Q3",
+    "name" : "자산총계",
+    "display" : "12499271263CNY",
+    "sign" : "+",
+    "period" : "2025-07.Q3"
+  }, {
+    "key" : "fin.total_liabilities.2025-07.Q3",
+    "name" : "부채총계",
+    "display" : "5687682950CNY",
+    "sign" : "+",
+    "period" : "2025-07.Q3"
+  }, {
+    "key" : "fin.total_equity.2025-07.Q3",
+    "name" : "자본총계",
+    "display" : "6811588313CNY",
+    "sign" : "+",
+    "period" : "2025-07.Q3"
+  }, {
+    "key" : "fin.capital_stock.2025-07.Q3",
+    "name" : "자본금",
+    "display" : "1094539928CNY",
+    "sign" : "+",
+    "period" : "2025-07.Q3"
+  }, {
+    "key" : "fin.debt_ratio.2025-07.Q3",
+    "name" : "부채비율",
+    "display" : "+83.5%",
+    "sign" : "+",
+    "period" : "2025-07.Q3"
+  }, {
+    "key" : "fin.debt_ratio_prior_end.2025-07.Q3",
+    "name" : "부채비율(전기말)",
+    "display" : "+76.6%",
+    "sign" : "+",
+    "period" : "2025-07.Q3"
+  }, {
+    "key" : "fin.debt_ratio_diff.2025-07.Q3",
+    "name" : "부채비율 변화",
+    "display" : "+6.9%p",
+    "sign" : "+",
+    "period" : "2025-07.Q3"
+  }, {
+    "key" : "fin.revenue_yoy_run.2025-07.Q3",
+    "name" : "매출 증가율 같은 방향 지속 분기 수",
+    "display" : "3분기",
+    "sign" : "+",
+    "period" : "2025-07.Q3"
+  } ],
+  "signals" : [ ],
+  "groups" : [ ],
+  "unavailable" : [ {
+    "metric" : "revenue_yoy",
+    "reason" : "NON_KRW"
+  } ],
+  "doNotMention" : [ ]
+}

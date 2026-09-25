@@ -108,6 +108,19 @@ public class CompanyService {
     }
 
     @Transactional(readOnly = true)
+    public Optional<Company> findById(long companyId) {
+        return companies.findById(companyId);
+    }
+
+    /** AI 적용 대상(ai_covered) 기업 ID. 대상 종목 범위(ACTIVE)로 한정한다. */
+    @Transactional(readOnly = true)
+    public List<Long> aiCoveredCompanyIds() {
+        return companies.findAllByStatusAndAiCovered(CompanyStatus.ACTIVE, true).stream()
+                .map(Company::getId)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public List<String> aliasesOf(Company company) {
         return aliases.findAllByCompany(company).stream().map(CompanyAlias::getAlias).toList();
     }

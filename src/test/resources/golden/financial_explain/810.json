@@ -1,0 +1,150 @@
+{
+  "company" : {
+    "name" : "SV인베스트먼트",
+    "format" : "FINANCIAL",
+    "currency" : "KRW",
+    "basis" : "CFS",
+    "fiscalYearEndMonth" : 3
+  },
+  "latest" : {
+    "period" : "2026-04.Q1",
+    "kind" : "QUARTER"
+  },
+  "changeStatus" : "NONE",
+  "sections" : [ "overview", "sales_profit", "structure", "history" ],
+  "periods" : [ {
+    "key" : "2026-04.Q1",
+    "label" : "2026.04~06(1분기)"
+  }, {
+    "key" : "2025-04.Q4",
+    "label" : "2025.04~2026.03 회계연도"
+  }, {
+    "key" : "2024-04.Q4",
+    "label" : "2024.04~2025.03 회계연도"
+  } ],
+  "facts" : [ {
+    "key" : "fin.revenue.2026-04.Q1",
+    "name" : "영업수익",
+    "display" : "91.5억원",
+    "sign" : "+",
+    "period" : "2026-04.Q1"
+  }, {
+    "key" : "fin.revenue_prior.2026-04.Q1",
+    "name" : "영업수익(전년 동기)",
+    "display" : "65.1억원",
+    "sign" : "+",
+    "period" : "2026-04.Q1"
+  }, {
+    "key" : "fin.operating_income.2026-04.Q1",
+    "name" : "영업이익",
+    "display" : "15.7억원",
+    "sign" : "+",
+    "period" : "2026-04.Q1"
+  }, {
+    "key" : "fin.operating_income_prior.2026-04.Q1",
+    "name" : "영업이익(전년 동기)",
+    "display" : "9.8억원",
+    "sign" : "+",
+    "period" : "2026-04.Q1"
+  }, {
+    "key" : "fin.net_income.2026-04.Q1",
+    "name" : "당기순이익",
+    "display" : "7.8억원",
+    "sign" : "+",
+    "period" : "2026-04.Q1"
+  }, {
+    "key" : "fin.net_income_prior.2026-04.Q1",
+    "name" : "당기순이익(전년 동기)",
+    "display" : "24.7억원",
+    "sign" : "+",
+    "period" : "2026-04.Q1"
+  }, {
+    "key" : "fin.revenue.2025-04.Q4",
+    "name" : "영업수익",
+    "display" : "214.3억원",
+    "sign" : "+",
+    "period" : "2025-04.Q4"
+  }, {
+    "key" : "fin.operating_income.2025-04.Q4",
+    "name" : "영업이익",
+    "display" : "-27.2억원",
+    "sign" : "-",
+    "period" : "2025-04.Q4"
+  }, {
+    "key" : "fin.net_income.2025-04.Q4",
+    "name" : "당기순이익",
+    "display" : "-10.0억원",
+    "sign" : "-",
+    "period" : "2025-04.Q4"
+  }, {
+    "key" : "fin.revenue.2024-04.Q4",
+    "name" : "영업수익",
+    "display" : "210.7억원",
+    "sign" : "+",
+    "period" : "2024-04.Q4"
+  }, {
+    "key" : "fin.operating_income.2024-04.Q4",
+    "name" : "영업이익",
+    "display" : "-60.5억원",
+    "sign" : "-",
+    "period" : "2024-04.Q4"
+  }, {
+    "key" : "fin.net_income.2024-04.Q4",
+    "name" : "당기순이익",
+    "display" : "-52.3억원",
+    "sign" : "-",
+    "period" : "2024-04.Q4"
+  }, {
+    "key" : "fin.total_assets.2026-04.Q1",
+    "name" : "자산총계",
+    "display" : "941.4억원",
+    "sign" : "+",
+    "period" : "2026-04.Q1"
+  }, {
+    "key" : "fin.total_liabilities.2026-04.Q1",
+    "name" : "부채총계",
+    "display" : "147.2억원",
+    "sign" : "+",
+    "period" : "2026-04.Q1"
+  }, {
+    "key" : "fin.total_equity.2026-04.Q1",
+    "name" : "자본총계",
+    "display" : "794.1억원",
+    "sign" : "+",
+    "period" : "2026-04.Q1"
+  }, {
+    "key" : "fin.capital_stock.2026-04.Q1",
+    "name" : "자본금",
+    "display" : "300.7억원",
+    "sign" : "+",
+    "period" : "2026-04.Q1"
+  } ],
+  "signals" : [ {
+    "ref" : "S1",
+    "type" : "FIN_OPERATING_TURN",
+    "status" : "PAST",
+    "nature" : "CHANGE",
+    "direction" : "NEGATIVE",
+    "severity" : "MEDIUM",
+    "period" : "2024-04.Q4",
+    "persistence" : null,
+    "factKeys" : [ "fin.operating_income.2024-04.Q4" ]
+  } ],
+  "groups" : [ {
+    "period" : "2024-04.Q4",
+    "topic" : "SALES_PROFIT",
+    "refs" : [ "S1" ],
+    "mixedDirection" : false
+  } ],
+  "unavailable" : [ {
+    "metric" : "revenue_yoy",
+    "reason" : "NOT_APPLICABLE_FORMAT"
+  }, {
+    "metric" : "operating_margin",
+    "reason" : "NOT_APPLICABLE_FORMAT"
+  }, {
+    "metric" : "debt_ratio",
+    "reason" : "NOT_APPLICABLE_FORMAT"
+  } ],
+  "doNotMention" : [ "부채비율", "영업이익률", "매출" ]
+}

@@ -14,6 +14,8 @@ interface CompanyRepository extends JpaRepository<Company, Long> {
     List<Company> findAllByStatusNot(CompanyStatus status);
 
     long countByStatusNot(CompanyStatus status);
+
+    List<Company> findAllByStatusAndAiCovered(CompanyStatus status, boolean aiCovered);
 }
 
 interface SecurityRepository extends JpaRepository<Security, Long> {

@@ -1,0 +1,156 @@
+{
+  "company" : {
+    "name" : "KT나스미디어",
+    "format" : "GENERAL",
+    "currency" : "KRW",
+    "basis" : "OFS",
+    "fiscalYearEndMonth" : 12
+  },
+  "latest" : {
+    "period" : "2026-01.Q2",
+    "kind" : "QUARTER"
+  },
+  "changeStatus" : "CHANGED",
+  "sections" : [ "overview", "sales_profit", "structure", "history" ],
+  "periods" : [ {
+    "key" : "2026-01.Q2",
+    "label" : "2026년 2분기"
+  } ],
+  "facts" : [ {
+    "key" : "fin.revenue.2026-01.Q2",
+    "name" : "매출액",
+    "display" : "322.6억원",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.revenue_prior.2026-01.Q2",
+    "name" : "매출액(전년 동기)",
+    "display" : "262.6억원",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.revenue_yoy.2026-01.Q2",
+    "name" : "매출 증가율(전년 같은 분기 대비)",
+    "display" : "+22.8%",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.operating_income.2026-01.Q2",
+    "name" : "영업이익",
+    "display" : "78.2억원",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.operating_income_prior.2026-01.Q2",
+    "name" : "영업이익(전년 동기)",
+    "display" : "26.0억원",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.operating_margin.2026-01.Q2",
+    "name" : "영업이익률",
+    "display" : "+24.2%",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.operating_margin_prior.2026-01.Q2",
+    "name" : "영업이익률(전년 동기)",
+    "display" : "+9.9%",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.operating_margin_diff.2026-01.Q2",
+    "name" : "영업이익률 변화",
+    "display" : "+14.3%p",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.net_income.2026-01.Q2",
+    "name" : "당기순이익",
+    "display" : "68.2억원",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.net_income_prior.2026-01.Q2",
+    "name" : "당기순이익(전년 동기)",
+    "display" : "-4.7억원",
+    "sign" : "-",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.total_assets.2026-01.Q2",
+    "name" : "자산총계",
+    "display" : "3937.0억원",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.total_liabilities.2026-01.Q2",
+    "name" : "부채총계",
+    "display" : "1908.6억원",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.total_equity.2026-01.Q2",
+    "name" : "자본총계",
+    "display" : "2028.4억원",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.capital_stock.2026-01.Q2",
+    "name" : "자본금",
+    "display" : "59.6억원",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.debt_ratio.2026-01.Q2",
+    "name" : "부채비율",
+    "display" : "+94.1%",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.debt_ratio_prior_end.2026-01.Q2",
+    "name" : "부채비율(전기말)",
+    "display" : "+118.3%",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.debt_ratio_diff.2026-01.Q2",
+    "name" : "부채비율 변화",
+    "display" : "-24.2%p",
+    "sign" : "-",
+    "period" : "2026-01.Q2"
+  } ],
+  "signals" : [ {
+    "ref" : "S1",
+    "type" : "FIN_OPERATING_MARGIN_CHANGE",
+    "status" : "ACTIVE",
+    "nature" : "CHANGE",
+    "direction" : "POSITIVE",
+    "severity" : "LOW",
+    "period" : "2026-01.Q2",
+    "persistence" : null,
+    "factKeys" : [ "fin.operating_margin.2026-01.Q2", "fin.operating_margin_prior.2026-01.Q2", "fin.operating_margin_diff.2026-01.Q2" ]
+  }, {
+    "ref" : "S2",
+    "type" : "FIN_OPERATING_MARGIN_CHANGE",
+    "status" : "PAST",
+    "nature" : "CHANGE",
+    "direction" : "NEGATIVE",
+    "severity" : "LOW",
+    "period" : "2025-01.Q2",
+    "persistence" : null,
+    "factKeys" : [ ]
+  } ],
+  "groups" : [ {
+    "period" : "2026-01.Q2",
+    "topic" : "SALES_PROFIT",
+    "refs" : [ "S1" ],
+    "mixedDirection" : false
+  }, {
+    "period" : "2025-01.Q2",
+    "topic" : "SALES_PROFIT",
+    "refs" : [ "S2" ],
+    "mixedDirection" : false
+  } ],
+  "unavailable" : [ ],
+  "doNotMention" : [ ]
+}

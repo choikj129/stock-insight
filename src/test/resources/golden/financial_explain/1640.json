@@ -1,0 +1,192 @@
+{
+  "company" : {
+    "name" : "프레스티지바이오파마",
+    "format" : "GENERAL",
+    "currency" : "USD",
+    "basis" : "CFS",
+    "fiscalYearEndMonth" : 6
+  },
+  "latest" : {
+    "period" : "2025-07.Q4",
+    "kind" : "ANNUAL"
+  },
+  "changeStatus" : "NONE",
+  "sections" : [ "overview", "sales_profit", "structure", "history" ],
+  "periods" : [ {
+    "key" : "2025-07.Q4",
+    "label" : "2025.07~2026.06 회계연도"
+  }, {
+    "key" : "2024-07.Q4",
+    "label" : "2024.07~2025.06 회계연도"
+  } ],
+  "facts" : [ {
+    "key" : "fin.revenue.2025-07.Q4",
+    "name" : "매출액",
+    "display" : "17984761USD",
+    "sign" : "+",
+    "period" : "2025-07.Q4"
+  }, {
+    "key" : "fin.revenue_prior.2025-07.Q4",
+    "name" : "매출액(전년 동기)",
+    "display" : "10215103USD",
+    "sign" : "+",
+    "period" : "2025-07.Q4"
+  }, {
+    "key" : "fin.operating_income.2025-07.Q4",
+    "name" : "영업이익",
+    "display" : "-64575387USD",
+    "sign" : "-",
+    "period" : "2025-07.Q4"
+  }, {
+    "key" : "fin.operating_income_prior.2025-07.Q4",
+    "name" : "영업이익(전년 동기)",
+    "display" : "-48025250USD",
+    "sign" : "-",
+    "period" : "2025-07.Q4"
+  }, {
+    "key" : "fin.operating_margin.2025-07.Q4",
+    "name" : "영업이익률",
+    "display" : "-359.1%",
+    "sign" : "-",
+    "period" : "2025-07.Q4"
+  }, {
+    "key" : "fin.operating_margin_prior.2025-07.Q4",
+    "name" : "영업이익률(전년 동기)",
+    "display" : "-470.1%",
+    "sign" : "-",
+    "period" : "2025-07.Q4"
+  }, {
+    "key" : "fin.operating_margin_diff.2025-07.Q4",
+    "name" : "영업이익률 변화",
+    "display" : "+111.1%p",
+    "sign" : "+",
+    "period" : "2025-07.Q4"
+  }, {
+    "key" : "fin.net_income.2025-07.Q4",
+    "name" : "당기순이익",
+    "display" : "-84774754USD",
+    "sign" : "-",
+    "period" : "2025-07.Q4"
+  }, {
+    "key" : "fin.net_income_prior.2025-07.Q4",
+    "name" : "당기순이익(전년 동기)",
+    "display" : "2974299USD",
+    "sign" : "+",
+    "period" : "2025-07.Q4"
+  }, {
+    "key" : "fin.revenue.2024-07.Q4",
+    "name" : "매출액",
+    "display" : "10215103USD",
+    "sign" : "+",
+    "period" : "2024-07.Q4"
+  }, {
+    "key" : "fin.operating_income.2024-07.Q4",
+    "name" : "영업이익",
+    "display" : "-48025250USD",
+    "sign" : "-",
+    "period" : "2024-07.Q4"
+  }, {
+    "key" : "fin.operating_margin.2024-07.Q4",
+    "name" : "영업이익률",
+    "display" : "-470.1%",
+    "sign" : "-",
+    "period" : "2024-07.Q4"
+  }, {
+    "key" : "fin.net_income.2024-07.Q4",
+    "name" : "당기순이익",
+    "display" : "2974299USD",
+    "sign" : "+",
+    "period" : "2024-07.Q4"
+  }, {
+    "key" : "fin.total_assets.2025-07.Q4",
+    "name" : "자산총계",
+    "display" : "478545810USD",
+    "sign" : "+",
+    "period" : "2025-07.Q4"
+  }, {
+    "key" : "fin.total_liabilities.2025-07.Q4",
+    "name" : "부채총계",
+    "display" : "151334608USD",
+    "sign" : "+",
+    "period" : "2025-07.Q4"
+  }, {
+    "key" : "fin.total_equity.2025-07.Q4",
+    "name" : "자본총계",
+    "display" : "327211202USD",
+    "sign" : "+",
+    "period" : "2025-07.Q4"
+  }, {
+    "key" : "fin.capital_stock.2025-07.Q4",
+    "name" : "자본금",
+    "display" : "525727248USD",
+    "sign" : "+",
+    "period" : "2025-07.Q4"
+  }, {
+    "key" : "fin.debt_ratio.2025-07.Q4",
+    "name" : "부채비율",
+    "display" : "+46.2%",
+    "sign" : "+",
+    "period" : "2025-07.Q4"
+  }, {
+    "key" : "fin.debt_ratio_prior_end.2025-07.Q4",
+    "name" : "부채비율(전기말)",
+    "display" : "+46.7%",
+    "sign" : "+",
+    "period" : "2025-07.Q4"
+  }, {
+    "key" : "fin.debt_ratio_diff.2025-07.Q4",
+    "name" : "부채비율 변화",
+    "display" : "-0.4%p",
+    "sign" : "-",
+    "period" : "2025-07.Q4"
+  }, {
+    "key" : "fin.impairment_ratio.2025-07.Q4",
+    "name" : "자본잠식률",
+    "display" : "+37.8%",
+    "sign" : "+",
+    "period" : "2025-07.Q4"
+  }, {
+    "key" : "fin.operating_loss_run.2025-07.Q4",
+    "name" : "연속 영업적자 분기 수",
+    "display" : "6분기",
+    "sign" : "+",
+    "period" : "2025-07.Q4"
+  } ],
+  "signals" : [ {
+    "ref" : "S1",
+    "type" : "FIN_OPERATING_LOSS_STREAK",
+    "status" : "ACTIVE",
+    "nature" : "STATE",
+    "direction" : "NEGATIVE",
+    "severity" : "MEDIUM",
+    "period" : "2024-07.Q3",
+    "persistence" : 6,
+    "factKeys" : [ ]
+  }, {
+    "ref" : "S2",
+    "type" : "FIN_CAPITAL_IMPAIRMENT",
+    "status" : "ACTIVE",
+    "nature" : "STATE",
+    "direction" : "NEGATIVE",
+    "severity" : "MEDIUM",
+    "period" : "2024-07.Q3",
+    "persistence" : 6,
+    "factKeys" : [ ]
+  } ],
+  "groups" : [ {
+    "period" : "2024-07.Q3",
+    "topic" : "SALES_PROFIT",
+    "refs" : [ "S1" ],
+    "mixedDirection" : false
+  }, {
+    "period" : "2024-07.Q3",
+    "topic" : "STRUCTURE",
+    "refs" : [ "S2" ],
+    "mixedDirection" : false
+  } ],
+  "unavailable" : [ {
+    "metric" : "revenue_yoy",
+    "reason" : "NON_KRW"
+  } ],
+  "doNotMention" : [ ]
+}

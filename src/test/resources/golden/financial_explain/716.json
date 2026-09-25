@@ -1,0 +1,207 @@
+{
+  "company" : {
+    "name" : "오가닉티코스메틱",
+    "format" : "GENERAL",
+    "currency" : "CNY",
+    "basis" : "CFS",
+    "fiscalYearEndMonth" : 12
+  },
+  "latest" : {
+    "period" : "2026-01.Q2",
+    "kind" : "QUARTER"
+  },
+  "changeStatus" : "CHANGED",
+  "sections" : [ "overview", "sales_profit", "structure", "history" ],
+  "periods" : [ {
+    "key" : "2026-01.Q2",
+    "label" : "2026년 2분기"
+  }, {
+    "key" : "2025-01.Q4",
+    "label" : "2025년(연간)"
+  } ],
+  "facts" : [ {
+    "key" : "fin.revenue.2026-01.Q2",
+    "name" : "매출액",
+    "display" : "364555549CNY",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.revenue_prior.2026-01.Q2",
+    "name" : "매출액(전년 동기)",
+    "display" : "234009193CNY",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.operating_income.2026-01.Q2",
+    "name" : "영업이익",
+    "display" : "65441255CNY",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.operating_income_prior.2026-01.Q2",
+    "name" : "영업이익(전년 동기)",
+    "display" : "-95380132CNY",
+    "sign" : "-",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.operating_margin.2026-01.Q2",
+    "name" : "영업이익률",
+    "display" : "+18.0%",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.operating_margin_prior.2026-01.Q2",
+    "name" : "영업이익률(전년 동기)",
+    "display" : "-40.8%",
+    "sign" : "-",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.operating_margin_diff.2026-01.Q2",
+    "name" : "영업이익률 변화",
+    "display" : "+58.7%p",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.net_income.2026-01.Q2",
+    "name" : "당기순이익",
+    "display" : "64749173CNY",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.net_income_prior.2026-01.Q2",
+    "name" : "당기순이익(전년 동기)",
+    "display" : "-174135627CNY",
+    "sign" : "-",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.revenue.2025-01.Q4",
+    "name" : "매출액",
+    "display" : "926741227CNY",
+    "sign" : "+",
+    "period" : "2025-01.Q4"
+  }, {
+    "key" : "fin.operating_income.2025-01.Q4",
+    "name" : "영업이익",
+    "display" : "-310836113CNY",
+    "sign" : "-",
+    "period" : "2025-01.Q4"
+  }, {
+    "key" : "fin.operating_margin.2025-01.Q4",
+    "name" : "영업이익률",
+    "display" : "-33.5%",
+    "sign" : "-",
+    "period" : "2025-01.Q4"
+  }, {
+    "key" : "fin.net_income.2025-01.Q4",
+    "name" : "당기순이익",
+    "display" : "-388563337CNY",
+    "sign" : "-",
+    "period" : "2025-01.Q4"
+  }, {
+    "key" : "fin.total_assets.2026-01.Q2",
+    "name" : "자산총계",
+    "display" : "1805254206CNY",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.total_liabilities.2026-01.Q2",
+    "name" : "부채총계",
+    "display" : "397902684CNY",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.total_equity.2026-01.Q2",
+    "name" : "자본총계",
+    "display" : "1407351522CNY",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.capital_stock.2026-01.Q2",
+    "name" : "자본금",
+    "display" : "1717400596CNY",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.debt_ratio.2026-01.Q2",
+    "name" : "부채비율",
+    "display" : "+28.3%",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.debt_ratio_prior_end.2026-01.Q2",
+    "name" : "부채비율(전기말)",
+    "display" : "+22.7%",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.debt_ratio_diff.2026-01.Q2",
+    "name" : "부채비율 변화",
+    "display" : "+5.6%p",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.impairment_ratio.2026-01.Q2",
+    "name" : "자본잠식률",
+    "display" : "+18.1%",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  }, {
+    "key" : "fin.revenue_yoy_run.2026-01.Q2",
+    "name" : "매출 증가율 같은 방향 지속 분기 수",
+    "display" : "2분기",
+    "sign" : "+",
+    "period" : "2026-01.Q2"
+  } ],
+  "signals" : [ {
+    "ref" : "S1",
+    "type" : "FIN_OPERATING_TURN",
+    "status" : "ACTIVE",
+    "nature" : "CHANGE",
+    "direction" : "POSITIVE",
+    "severity" : "MEDIUM",
+    "period" : "2026-01.Q2",
+    "persistence" : null,
+    "factKeys" : [ "fin.operating_income.2026-01.Q2", "fin.operating_income_prior.2026-01.Q2" ]
+  }, {
+    "ref" : "S2",
+    "type" : "FIN_CAPITAL_IMPAIRMENT",
+    "status" : "ACTIVE",
+    "nature" : "STATE",
+    "direction" : "NEGATIVE",
+    "severity" : "MEDIUM",
+    "period" : "2025-01.Q2",
+    "persistence" : 5,
+    "factKeys" : [ ]
+  }, {
+    "ref" : "S3",
+    "type" : "FIN_OPERATING_LOSS_STREAK",
+    "status" : "PAST",
+    "nature" : "STATE",
+    "direction" : "NEGATIVE",
+    "severity" : "MEDIUM",
+    "period" : "2025-01.Q1",
+    "persistence" : 5,
+    "factKeys" : [ ]
+  } ],
+  "groups" : [ {
+    "period" : "2026-01.Q2",
+    "topic" : "SALES_PROFIT",
+    "refs" : [ "S1" ],
+    "mixedDirection" : false
+  }, {
+    "period" : "2025-01.Q2",
+    "topic" : "STRUCTURE",
+    "refs" : [ "S2" ],
+    "mixedDirection" : false
+  }, {
+    "period" : "2025-01.Q1",
+    "topic" : "SALES_PROFIT",
+    "refs" : [ "S3" ],
+    "mixedDirection" : false
+  } ],
+  "unavailable" : [ {
+    "metric" : "revenue_yoy",
+    "reason" : "NON_KRW"
+  } ],
+  "doNotMention" : [ ]
+}
