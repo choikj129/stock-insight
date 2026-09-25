@@ -53,6 +53,11 @@ app:
       max-calls-per-run: 500
       # 올해 포함 4개 bsns_year(올해, 올해-1, 올해-2, 올해-3) × 4개 보고서 종류.
       initial-load-years: 3
+  signal:
+    financial-signal:
+      # 재무 수집(06:30) 뒤 하루 한 번.
+      cron: "0 0 7 * * *"
+      run-on-startup: false
 
 management:
   endpoints:

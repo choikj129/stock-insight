@@ -57,6 +57,11 @@ DART_API_KEY: 발급받은키
 ./gradlew bootRun --args='--app.ingest.financial-sync.run-on-startup=true --app.ingest.financial-sync.initial-load-years=0'
 ```
 
+```bash
+# 재무 신호 계산을 한 번 실행한다. 외부 호출 없이 DB에 있는 재무 데이터만 쓴다.
+./gradlew bootRun --args='--app.signal.financial-signal.run-on-startup=true'
+```
+
 정기 실행은 `app.scheduler.enabled=true`(운영 프로필 기본값)일 때 돈다.
 
 | 작업 | 시각 (KST) | 한 실행 호출 상한 |
@@ -64,6 +69,7 @@ DART_API_KEY: 발급받은키
 | 기업 목록 동기화 (`company-sync`) | 매일 05:00 | `app.ingest.company-sync.max-calls-per-run` (10,000) |
 | 공시 목록 수집 (`disclosure-sync`) | 매일 06:00 전체, 평일 08:00~19:30 30분마다 당일분 | `app.ingest.disclosure-sync.max-calls-per-run` (3,000) |
 | 재무 수집 (`financial-sync`) | 매일 06:30 | `app.ingest.financial-sync.max-calls-per-run` (500) |
+| 재무 신호 계산 (`financial-signal`) | 매일 07:00 | 없음(외부 호출이 없는 DB 계산) |
 
 호출 상한에 닿으면 멈추고 남은 대상은 다음 실행이 이어서 처리한다. OpenDART 하루 한도는 인증키당 20,000건이다.
 

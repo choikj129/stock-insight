@@ -102,6 +102,12 @@ public class FinancialService {
         return repository.findFull(companyId, bsnsYear, reportCode, fsDiv);
     }
 
+    /** 기업별 재무 마지막 변경 시각. 재무 신호 재계산 대상 판단에 쓴다(architecture.md §4.4). */
+    @Transactional(readOnly = true)
+    public Map<Long, Instant> lastChangedByCompanyId() {
+        return repository.lastChangedByCompanyId();
+    }
+
     private boolean sameContent(ExistingReport existing, LocalDate fiscalYearStart, LocalDate periodEnd,
             String currency, String receiptNo, List<StoredFinancialLine> newLines) {
         if (!existing.fiscalYearStart().equals(fiscalYearStart) || !existing.periodEnd().equals(periodEnd)

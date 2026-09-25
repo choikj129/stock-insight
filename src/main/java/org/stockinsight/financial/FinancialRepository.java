@@ -4,9 +4,14 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
@@ -79,6 +84,60 @@ class FinancialRepository {
                         rs.getObject("prior_cumulative_amount", BigDecimal.class),
                         rs.getObject("prior2_amount", BigDecimal.class)))
                 .list();
+    }
+
+    /** 한 기업의 모든 보고서와 계정 행. 재무 요약을 만들 때 한 번에 읽는다. */
+    List<StoredFinancialReport> findAllByCompany(long companyId) {
+        record Row(long reportId, int bsnsYear, String reportCode, String fsDiv, LocalDate fiscalYearStart,
+                LocalDate periodEnd, String currency, String receiptNo, StoredFinancialLine line) {
+        }
+        List<Row> rows = jdbc.sql("""
+                        select r.id as report_id, r.bsns_year, r.report_code, r.fs_div, r.fiscal_year_start,
+                               r.period_end, r.currency, r.receipt_no,
+                               l.ord, l.statement, l.account_name, l.current_amount, l.current_cumulative_amount,
+                               l.prior_amount, l.prior_cumulative_amount, l.prior2_amount
+                          from financial_report r
+                          join financial_line l on l.report_id = r.id
+                         where r.company_id = :companyId
+                         order by r.period_end, r.fs_div, l.ord
+                        """)
+                .param("companyId", companyId)
+                .query((rs, rowNum) -> new Row(
+                        rs.getLong("report_id"), rs.getInt("bsns_year"), rs.getString("report_code"),
+                        rs.getString("fs_div"), rs.getObject("fiscal_year_start", LocalDate.class),
+                        rs.getObject("period_end", LocalDate.class), rs.getString("currency"), rs.getString("receipt_no"),
+                        new StoredFinancialLine(
+                                rs.getInt("ord"), rs.getString("statement"), rs.getString("account_name"),
+                                rs.getObject("current_amount", BigDecimal.class),
+                                rs.getObject("current_cumulative_amount", BigDecimal.class),
+                                rs.getObject("prior_amount", BigDecimal.class),
+                                rs.getObject("prior_cumulative_amount", BigDecimal.class),
+                                rs.getObject("prior2_amount", BigDecimal.class))))
+                .list();
+
+        Map<Long, List<Row>> byReport = rows.stream()
+                .collect(Collectors.groupingBy(Row::reportId, LinkedHashMap::new, Collectors.toList()));
+        List<StoredFinancialReport> reports = new ArrayList<>();
+        for (List<Row> group : byReport.values()) {
+            Row first = group.get(0);
+            reports.add(new StoredFinancialReport(
+                    companyId, first.bsnsYear(), first.reportCode(), first.fsDiv(),
+                    PeriodType.fromReportCode(first.reportCode()), first.fiscalYearStart(), first.periodEnd(),
+                    first.currency(), first.receiptNo(), group.stream().map(Row::line).toList()));
+        }
+        return reports;
+    }
+
+    /** 기업별 재무 마지막 변경 시각(가장 늦은 financial_report.updated_at). 신호 재계산 대상 판단에 쓴다. */
+    Map<Long, Instant> lastChangedByCompanyId() {
+        Map<Long, Instant> result = new HashMap<>();
+        jdbc.sql("select company_id, max(updated_at) as last_changed from financial_report group by company_id")
+                .query((rs, rowNum) -> {
+                    result.put(rs.getLong("company_id"), rs.getTimestamp("last_changed").toInstant());
+                    return null;
+                })
+                .list();
+        return result;
     }
 
     void delete(long reportId) {
