@@ -35,3 +35,11 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### 비밀값 (docs/architecture.md §8) ###
+# 실제 비밀값 파일은 저장소 밖에 둔다. 실수로 저장소 안에 만들어도 커밋되지 않게 막는다.
+secrets*.yml
+!secrets.example.yml
+.env
+.env.*
+!.env.example

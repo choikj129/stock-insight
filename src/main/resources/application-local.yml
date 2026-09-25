@@ -1,5 +1,9 @@
 # 로컬 개발: compose.yaml의 PostgreSQL을 사용한다.
 spring:
+  config:
+    # 비밀값은 저장소 밖 파일에서 읽는다 (docs/architecture.md §8, D-30). 파일이 없어도 기동한다.
+    # 형식은 저장소의 secrets.example.yml 참고. 같은 이름의 환경 변수가 있으면 환경 변수가 우선한다.
+    import: optional:file:${STOCKINSIGHT_SECRETS:${user.home}/.stockinsight/secrets.yml}
   datasource:
     url: jdbc:postgresql://localhost:5432/stockinsight
     username: stockinsight

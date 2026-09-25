@@ -38,6 +38,14 @@ app:
       refresh-after: 30d
       min-listed-count: 1000
       max-delisted-ratio: 0.1
+    disclosure-sync:
+      # 전체 실행은 기업 목록 동기화(05:00) 뒤에 전날을 확정하고 초기 적재를 이어 받는다.
+      cron: "0 0 6 * * *"
+      intraday-cron: "0 */30 8-19 * * MON-FRI"
+      run-on-startup: false
+      # 초기 적재 3년 ≈ 3,300일·유형 + 추가 페이지. 두어 번의 실행에 나눠 받는다.
+      max-calls-per-run: 3000
+      initial-load-period: 3y
 
 management:
   endpoints:

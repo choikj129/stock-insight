@@ -1,6 +1,8 @@
-# 운영: 접속 정보는 환경 변수로만 주입한다 (값은 SSM Parameter Store에서 가져온다).
-# 값이 없으면 기동에 실패하도록 기본값을 두지 않는다.
+# 운영: 비밀값은 서버의 저장소 밖 파일에서 읽는다 (docs/architecture.md §8, D-30).
+# 파일이 없거나 값이 비어 있으면 기동에 실패하도록 optional과 기본값을 두지 않는다.
 spring:
+  config:
+    import: file:${STOCKINSIGHT_SECRETS:/etc/stockinsight/secrets.yml}
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}

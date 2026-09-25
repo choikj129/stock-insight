@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.SocketTimeoutException;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.zip.ZipEntry;
@@ -116,6 +117,77 @@ class DartClientTest {
         assertThatThrownBy(() -> client.fetchCorpCodes())
                 .isInstanceOfSatisfying(DartApiException.class,
                         e -> assertThat(e.status()).isEqualTo(DartStatus.UNREGISTERED_KEY));
+    }
+
+    @Test
+    void readsOneDayOfDisclosuresIncludingAmendedOriginals() {
+        server.expect(requestTo(startsWith(BASE_URL + "/list.json")))
+                .andExpect(queryParam("bgn_de", "20260814"))
+                .andExpect(queryParam("end_de", "20260814"))
+                .andExpect(queryParam("pblntf_ty", "B"))
+                .andExpect(queryParam("last_reprt_at", "N"))
+                .andExpect(queryParam("page_no", "1"))
+                .andExpect(queryParam("page_count", "100"))
+                .andExpect(queryParam("crtfc_key", API_KEY))
+                .andRespond(withSuccess(fixture("list-20260814-B.json"), MediaType.APPLICATION_JSON));
+
+        DartDisclosurePage page = client.fetchDisclosures(LocalDate.of(2026, 8, 14), "B", 1);
+
+        assertThat(page.hasNextPage()).isFalse();
+        assertThat(page.list()).first().satisfies(item -> {
+            assertThat(item.corpCode()).isEqualTo("00101220");
+            assertThat(item.corpCls()).isEqualTo("Y");
+            assertThat(item.receiptNo()).isEqualTo("20260814003888");
+            assertThat(item.receivedDate()).isEqualTo("20260814");
+            assertThat(item.reportName()).isEqualTo("주요사항보고서(자기주식처분결정)");
+            assertThat(item.remark()).isEmpty();
+        });
+        assertThat(page.list()).extracting(DartDisclosure::reportName)
+                .contains("[기재정정]주요사항보고서(유상증자결정)");
+        // 비상장 기타법인(E)도 섞여 온다. 저장 대상은 수집기가 ACTIVE 기업으로 고른다.
+        assertThat(page.list()).filteredOn(item -> item.corpCls().equals("E"))
+                .allSatisfy(item -> assertThat(item.stockCode()).isEmpty());
+        server.verify();
+    }
+
+    @Test
+    void tellsWhenMorePagesRemain() {
+        server.expect(requestTo(startsWith(BASE_URL + "/list.json")))
+                .andRespond(withSuccess(fixture("list-20260814-I-page1.json"), MediaType.APPLICATION_JSON));
+
+        DartDisclosurePage page = client.fetchDisclosures(LocalDate.of(2026, 8, 14), "I", 1);
+
+        assertThat(page.totalPage()).isEqualTo(3);
+        assertThat(page.hasNextPage()).isTrue();
+        // 원본 보고서명에는 끝 공백과 연속 공백이 있다. 정리는 저장할 때 한다.
+        assertThat(page.list()).extracting(DartDisclosure::reportName).anyMatch(name -> name.endsWith("  "));
+    }
+
+    @Test
+    void dayWithoutDisclosuresIsEmptyPage() {
+        // 실제 응답: 주말과 마지막 페이지를 넘긴 요청 모두 013이다.
+        server.expect(requestTo(startsWith(BASE_URL + "/list.json")))
+                .andRespond(withSuccess(fixture("list-error-013.json"), MediaType.APPLICATION_JSON));
+
+        DartDisclosurePage page = client.fetchDisclosures(LocalDate.of(2026, 9, 19), "A", 1);
+
+        assertThat(page.list()).isEmpty();
+        assertThat(page.totalCount()).isZero();
+        assertThat(page.hasNextPage()).isFalse();
+    }
+
+    @Test
+    void invalidSearchConditionIsItemErrorWithoutLeakingKey() {
+        // 실제 응답: 기업을 지정하지 않고 3개월 넘게 조회하면 100이다.
+        server.expect(requestTo(startsWith(BASE_URL + "/list.json")))
+                .andRespond(withSuccess(fixture("list-error-100.json"), MediaType.APPLICATION_JSON));
+
+        assertThatThrownBy(() -> client.fetchDisclosures(LocalDate.of(2026, 8, 14), "A", 1))
+                .isInstanceOfSatisfying(DartApiException.class, e -> {
+                    assertThat(e.status()).isEqualTo(DartStatus.INVALID_FIELD);
+                    assertThat(e.stopsRun()).isFalse();
+                    assertThat(e.getMessage()).contains("list.json 20260814 A p1").doesNotContain(API_KEY);
+                });
     }
 
     @Test

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -24,19 +25,20 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.stockinsight.TestcontainersConfiguration;
-import org.stockinsight.stockinsight.common.pipeline.PipelineRunRecorder.RunStatus;
-import org.stockinsight.stockinsight.company.Company;
-import org.stockinsight.stockinsight.company.CompanyService;
-import org.stockinsight.stockinsight.company.CompanyStatus;
-import org.stockinsight.stockinsight.company.ExclusionReason;
-import org.stockinsight.stockinsight.company.Market;
-import org.stockinsight.stockinsight.ingest.checkpoint.IngestCheckpoint;
-import org.stockinsight.stockinsight.ingest.checkpoint.IngestCheckpointRepository;
-import org.stockinsight.stockinsight.ingest.dart.DartApi;
-import org.stockinsight.stockinsight.ingest.dart.DartApiException;
-import org.stockinsight.stockinsight.ingest.dart.DartCompanyOverview;
-import org.stockinsight.stockinsight.ingest.dart.DartCorpCode;
-import org.stockinsight.stockinsight.ingest.dart.DartStatus;
+import org.stockinsight.common.pipeline.PipelineRunRecorder.RunStatus;
+import org.stockinsight.company.Company;
+import org.stockinsight.company.CompanyService;
+import org.stockinsight.company.CompanyStatus;
+import org.stockinsight.company.ExclusionReason;
+import org.stockinsight.company.Market;
+import org.stockinsight.ingest.checkpoint.IngestCheckpoint;
+import org.stockinsight.ingest.checkpoint.IngestCheckpointRepository;
+import org.stockinsight.ingest.dart.DartApi;
+import org.stockinsight.ingest.dart.DartApiException;
+import org.stockinsight.ingest.dart.DartCompanyOverview;
+import org.stockinsight.ingest.dart.DartCorpCode;
+import org.stockinsight.ingest.dart.DartDisclosurePage;
+import org.stockinsight.ingest.dart.DartStatus;
 
 /**
  * 인증키 없이 가짜 OpenDART로 동기화 규칙을 검증한다. 한 실행의 호출 상한은 3건(고유번호 1 + 기업개황 2)이다.
@@ -271,6 +273,11 @@ class CompanySyncJobTest {
                 throw new DartApiException(failure, "fake " + failure.code());
             }
             return Optional.ofNullable(overviews.get(corpCode));
+        }
+
+        @Override
+        public DartDisclosurePage fetchDisclosures(LocalDate receivedOn, String disclosureType, int pageNo) {
+            throw new UnsupportedOperationException("기업 목록 동기화는 공시 목록을 읽지 않는다");
         }
     }
 
