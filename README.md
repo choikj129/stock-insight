@@ -80,3 +80,4 @@ DART_API_KEY: 발급받은키
 - [데이터·AI 분석 명세](docs/ai-analysis.md) — 기업 신호, 분석 종류(향후 전망 포함), 지문·재생성, 검증, 비용
 - [설계 결정 기록](docs/decisions.md) — 주요 설계 결정과 이유
 - [구현 계획](docs/implementation-plan.md) — 진행 현황과 다음 단계 작업 계획
+- [코드 분석 가이드](docs/code-guide.md) — 현재 코드의 구조, 기동·실행 흐름, 설정·데이터 흐름, 실행 특성 (코드와 함께 갱신)
