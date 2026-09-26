@@ -91,6 +91,7 @@ stockInsight/
 ├── compose.yaml            로컬 PostgreSQL 17 (127.0.0.1:5432, DB·계정 stockinsight, TZ=UTC)
 ├── secrets.example.yml     비밀값 파일 형식 예시 (실제 파일은 저장소 밖)
 ├── .github/workflows/ci.yml  gitleaks 비밀값 검사 + ./gradlew build (Testcontainers)
+├── .gitleaks.toml          gitleaks 기본 규칙 + Anthropic 키 규칙 + 확인된 오탐(재무 사실 키) 허용
 ├── docs/                   설계·계획·이 가이드
 └── src/
     ├── main/java/org/stockinsight/   애플리케이션 코드 (§3)
@@ -959,6 +960,13 @@ architecture.md §4.2의 나머지 테이블(`price_daily`, `market_holiday`, `d
 - `FakeLlmClient`(`analysis.llm` 테스트 패키지): 준비해 둔 `LlmResult`/예외를 호출 순서대로 돌려주고 호출 인자(시스템 프롬프트·사용자 입력·스키마)를 기록한다. `FinancialExplainJobTest`가 이걸로 재시도·거절·호출 실패·예산·게시 여부·중복 호출 방지를 인증키 없이 확인한다.
 - 골든셋: `src/test/resources/golden/financial_explain/*.json`은 자동 테스트가 아니라 `GoldenSetDumpRunner`(§4.9)가 로컬 실 데이터로 만든 고정 입력이다. 프롬프트·모델을 바꿀 때 사람이 비교하는 참고 자료다.
 - CI(`ci.yml`): gitleaks 비밀값 검사, JDK 21에서 `./gradlew build`(테스트 포함). 실패하면 테스트 리포트를 업로드한다. Anthropic 인증키 없이도 전부 통과한다(`FakeLlmClient`).
+- gitleaks 설정(`.gitleaks.toml`)
+  - CI의 `gitleaks-action@v3`는 gitleaks **8.24.3**을 `detect --redact -v --exit-code=2`로 실행한다. `--config`를 넘기지 않으므로 gitleaks가 저장소 루트의 `.gitleaks.toml`을 자동으로 읽는다(디버그 로그 `using existing gitleaks config .gitleaks.toml`). push는 `--log-opts=--no-merges --first-parent <base>^..<head>` 범위만 검사한다.
+  - 기본 규칙(`[extend] useDefault = true`)을 모두 쓴다.
+  - 8.24.3 기본 규칙에는 Anthropic 키 규칙이 없다(실제 `sk-ant-api03-…` 형식 키도 탐지되지 않음을 확인). 그래서 최신 gitleaks의 `anthropic-api-key`, `anthropic-admin-api-key` 규칙을 원문 그대로 추가했다. gitleaks 버전을 올려 기본 규칙에 포함되면 중복되므로 이 두 규칙을 지운다.
+  - 허용은 재무 사실 키 하나뿐이다: `^fin\.[a-z]+(?:_[a-z]+)*\.\d{4}-(?:0[1-9]|1[0-2])\.Q[1-4]$`(비밀값 문자열 전체와 일치해야 함). 이 값은 `"key": ...` 형태라서 `generic-api-key`에 걸린다(골든셋 JSON, ai-analysis.md). 기간 키(`YYYY-MM.Qn`)만 있는 값은 기본 규칙에 걸리지 않으므로 허용하지 않는다. 지표 자리에 숫자를 허용하지 않는 것은 무작위 문자열이 허용 형식을 흉내 내는 것을 막기 위함이다.
+  - 키 형식(`PeriodKey.displayKey()`, `FinancialExplainInputBuilder`의 `"fin." + 지표 + "." + 기간 키`)을 바꾸면 이 정규식도 함께 고친다. 허용 범위를 파일·경로 단위로 넓히지 않는다.
+  - 설정을 바꿀 때 검증: CI와 같은 버전(8.24.3)으로 ① `gitleaks detect --source . -v --log-level=debug`(이력 전체, 설정 자동 인식), ② `gitleaks detect --source . --no-git`(작업 트리), ③ 가짜 비밀값을 넣은 임시 저장소에서 탐지 여부를 확인한다. 2026-09-26 검증 결과: 기본 규칙만으로 141건(모두 `fdb0ef4`의 재무 사실 키) → 이 설정으로 0건. 가짜 일반 API 키·DART형 hex 키·Anthropic 키·관리자 키·허용 형식 우회값(지표에 숫자, 앞뒤 덧붙임, 잘못된 월, 허용 키와 같은 줄의 비밀값)은 모두 탐지됐다.
 
 ---
 

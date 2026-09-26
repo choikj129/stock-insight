@@ -33,7 +33,7 @@ DART_API_KEY: 발급받은키
 - 다른 위치의 파일을 쓰려면 환경 변수 `STOCKINSIGHT_SECRETS`에 경로를 지정한다.
 - 같은 이름의 환경 변수(`DART_API_KEY` 등)가 있으면 파일보다 우선한다. 한 번만 다른 키로 실행해 볼 때 쓴다.
 - 운영 서버는 `/etc/stockinsight/secrets.yml`(소유자만 읽기)을 쓰고, 파일이 없으면 기동하지 않는다.
-- `secrets*.yml`, `.env*`는 `.gitignore`에 있고, CI는 gitleaks로 커밋 이력을 검사한다. 커밋 전에 로컬에서도 검사하려면 [gitleaks](https://github.com/gitleaks/gitleaks)를 설치해 `gitleaks git`을 실행한다.
+- `secrets*.yml`, `.env*`는 `.gitignore`에 있고, CI는 gitleaks로 커밋 이력을 검사한다. 커밋 전에 로컬에서도 검사하려면 [gitleaks](https://github.com/gitleaks/gitleaks)를 설치해 `gitleaks git`을 실행한다. [.gitleaks.toml](.gitleaks.toml)은 기본 규칙에 Anthropic 키 규칙을 더하고, 확인된 오탐만 값 형식 단위로 허용한다(CI와 같은 gitleaks 8.24.3 기준, [코드 가이드 §14](docs/code-guide.md#14-테스트-구조)).
 - 키가 노출되면 git 이력을 지우는 것으로는 부족하다. 즉시 재발급한다.
 
 ### OpenDART 수집

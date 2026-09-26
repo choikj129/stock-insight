@@ -1,0 +1,29 @@
+# gitleaks 설정. 기본 규칙을 모두 쓰고, 기본 규칙에 없는 규칙을 더하고, 확인된 오탐만 좁게 허용한다.
+# CI(gitleaks-action@v3)는 gitleaks 8.24.3으로 이 파일을 자동으로 읽는다. 검증 방법은 docs/code-guide.md §14.
+title = "stock-insight gitleaks config"
+
+[extend]
+useDefault = true
+
+# 8.24.3 기본 규칙에는 Anthropic 키 규칙이 없다. 최신 gitleaks config/gitleaks.toml의 규칙을 그대로 옮겼다.
+[[rules]]
+id = "anthropic-admin-api-key"
+description = "Detected an Anthropic Admin API Key, risking unauthorized access to administrative functions and sensitive AI model configurations."
+regex = '''\b(sk-ant-admin01-[a-zA-Z0-9_\-]{93}AA)(?:[\x60'"\s;]|\\[nr]|$)'''
+keywords = ["sk-ant-admin01"]
+
+[[rules]]
+id = "anthropic-api-key"
+description = "Identified an Anthropic API Key, which may compromise AI assistant integrations and expose sensitive data to unauthorized access."
+regex = '''\b(sk-ant-api03-[a-zA-Z0-9_\-]{93}AA)(?:[\x60'"\s;]|\\[nr]|$)'''
+keywords = ["sk-ant-api03"]
+
+# 재무 사실 키 fin.<지표>.<기간 키> (예: fin.operating_income.2026-01.Q2). "key": 뒤에 와서 generic-api-key에 걸린다.
+# 지표는 영문 소문자 단어를 밑줄로 이은 것만, 기간 키는 PeriodKey.displayKey() 형식(YYYY-MM.Q1~Q4)만 허용한다.
+# 키 형식을 바꾸면 이 정규식도 함께 고친다. 파일·경로 단위로 넓히지 않는다.
+[allowlist]
+description = "재무 사실 키"
+regexTarget = "secret"
+regexes = [
+    '''^fin\.[a-z]+(?:_[a-z]+)*\.\d{4}-(?:0[1-9]|1[0-2])\.Q[1-4]$''',
+]
