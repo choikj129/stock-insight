@@ -11,7 +11,7 @@
     "kind" : "ANNUAL"
   },
   "changeStatus" : "NONE",
-  "sections" : [ "overview", "sales_profit", "structure", "history" ],
+  "sections" : [ "overview", "sales_profit", "structure" ],
   "periods" : [ {
     "key" : "2025-07.Q4",
     "label" : "2025.07~2026.06 회계연도"

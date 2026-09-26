@@ -11,7 +11,7 @@
     "kind" : "QUARTER"
   },
   "changeStatus" : "CHANGED",
-  "sections" : [ "overview", "sales_profit", "structure", "history" ],
+  "sections" : [ "overview", "sales_profit", "structure" ],
   "periods" : [ {
     "key" : "2026-01.Q2",
     "label" : "2026년 2분기"

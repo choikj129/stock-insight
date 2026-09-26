@@ -271,7 +271,9 @@ public class FinancialExplainInputBuilder {
         if (fc.hasBalanceFacts) {
             sections.add("structure");
         }
-        if (!selection.past().isEmpty() || fc.hasFlowFacts) {
+        // 흐름 사실(revenue_yoy_run, operating_loss_run)은 최신 기간까지 이어지는 상태라 history(과거형) 대상이
+        // 아니다(D-45). history는 오직 PAST 신호가 있을 때만 연다.
+        if (!selection.past().isEmpty()) {
             sections.add("history");
         }
         return sections;
@@ -306,7 +308,6 @@ public class FinancialExplainInputBuilder {
         final Integer fiscalMonth;
         boolean hasIncomeFacts;
         boolean hasBalanceFacts;
-        boolean hasFlowFacts;
 
         FactCollector(boolean nonKrw, FinancialFormat format, String currency, String basis, Integer fiscalMonth) {
             this.nonKrw = nonKrw;
@@ -461,12 +462,10 @@ public class FinancialExplainInputBuilder {
             if (latestRevenueYoyAvailable && Math.abs(revenueRun) >= 2) {
                 label(latest, false);
                 put(latest, "revenue_yoy_run", "매출 같은 방향 연속 분기 수", BigDecimal.valueOf(revenueRun), "분기", null, null);
-                hasFlowFacts = true;
             }
             if (lossRun >= 2) {
                 label(latest, false);
                 put(latest, "operating_loss_run", "연속 영업적자 분기 수", BigDecimal.valueOf(lossRun), "분기", null, null);
-                hasFlowFacts = true;
             }
         }
 

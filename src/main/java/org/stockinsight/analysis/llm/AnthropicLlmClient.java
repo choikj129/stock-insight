@@ -17,6 +17,7 @@ import com.anthropic.models.messages.OutputConfig;
 import com.anthropic.models.messages.StopReason;
 import com.anthropic.models.messages.TextBlock;
 import com.anthropic.models.messages.TextBlockParam;
+import com.anthropic.models.messages.ThinkingConfigDisabled;
 import com.anthropic.models.messages.Usage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -56,6 +57,10 @@ public class AnthropicLlmClient implements LlmClient {
         MessageCreateParams params = MessageCreateParams.builder()
                 .model(properties.model())
                 .maxTokens(properties.maxTokens())
+                // 이 분석은 코드가 판정을 끝낸 사실·신호를 문장으로 옮기기만 한다(D-06). 확장 사고는 이 역할에 필요
+                // 없고, 켜 두면(기본값) max_tokens를 사고 토큰이 먼저 소비해 구조화 출력이 잘린다(2026-09-26 실측:
+                // 사고 토큰 약 1,000+개, 응답 텍스트는 400개 안팎). Sonnet 5는 disabled를 그대로 받아들인다.
+                .thinking(ThinkingConfigDisabled.builder().build())
                 .systemOfTextBlockParams(List.of(TextBlockParam.builder()
                         .text(systemPrompt)
                         .cacheControl(CacheControlEphemeral.builder().build())

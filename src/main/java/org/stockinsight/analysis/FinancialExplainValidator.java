@@ -232,10 +232,21 @@ public final class FinancialExplainValidator {
         }
     }
 
-    /** 규칙 7: 이력(PAST) 신호는 history에서만, 활성 신호는 history 밖에서만. */
+    /** 흐름 사실(최신 기간까지 이어지는 상태라 history 대상이 아니다, D-45). */
+    private static final Set<String> ONGOING_FLOW_METRICS = Set.of("revenue_yoy_run", "operating_loss_run");
+
+    /**
+     * 규칙 7: 이력(PAST) 신호는 history에서만, 활성 신호는 history 밖에서만. 흐름 사실(fin.revenue_yoy_run·
+     * fin.operating_loss_run)은 지금도 이어지는 상태라 history에 쓰지 않는다(D-45).
+     */
     private static void checkHistoryTense(String sentence, List<TokenRef> tokens, String section,
             Map<String, org.stockinsight.analysis.FinancialExplainInput.SignalRef> signalByRef, Set<String> failedRules) {
         for (TokenRef t : tokens) {
+            if (t.kind().equals("fin") && "history".equals(section)
+                    && ONGOING_FLOW_METRICS.stream().anyMatch(m -> t.raw().startsWith("fin." + m + "."))) {
+                failedRules.add("7");
+                continue;
+            }
             if (!t.kind().equals("sig")) {
                 continue;
             }
@@ -261,8 +272,11 @@ public final class FinancialExplainValidator {
             }
         }
         for (var u : input.unavailable()) {
+            // "revenue"(매출 원값 자체가 없음)와 "revenue_yoy"(증가율만 못 줌, 원값은 있음)는 다른 사유다.
+            // revenue_yoy만 unavailable이어도 원값(revenue) 사실은 사실표에 있고 sales_profit이 반드시
+            // "매출(규모)"을 언급해야 하므로(§4.4.3), revenue_yoy를 "매출"에 묶어 막으면 안 된다.
             String name = switch (u.metric()) {
-                case "revenue", "revenue_yoy" -> "매출";
+                case "revenue" -> "매출";
                 case "operating_margin" -> "영업이익률";
                 case "debt_ratio" -> "부채비율";
                 case "impairment_ratio" -> "잠식률";

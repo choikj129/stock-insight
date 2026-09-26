@@ -12,7 +12,7 @@ import org.springframework.util.StreamUtils;
  */
 final class FinancialExplainPrompt {
 
-    static final String PROMPT_VERSION = "fx-v1";
+    static final String PROMPT_VERSION = "fx-v2";
     static final String SCHEMA_VERSION = "fx-schema-1";
 
     static final String SYSTEM_PROMPT = load("classpath:prompts/common/style.md") + "\n\n"

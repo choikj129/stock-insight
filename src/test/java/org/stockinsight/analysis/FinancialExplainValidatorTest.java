@@ -21,6 +21,8 @@ class FinancialExplainValidatorTest {
             "fin.operating_income.2026-01.Q2", "영업이익", "5.0억원", "+", "2026-01.Q2");
     private static final FinancialExplainInput.Fact OPERATING_MARGIN = new FinancialExplainInput.Fact(
             "fin.operating_margin.2026-01.Q2", "영업이익률", "+12.5%", "+", "2026-01.Q2");
+    private static final FinancialExplainInput.Fact OPERATING_LOSS_RUN = new FinancialExplainInput.Fact(
+            "fin.operating_loss_run.2026-01.Q2", "연속 영업적자 분기 수", "3분기", "-", "2026-01.Q2");
 
     private static FinancialExplainInput baseInput(List<String> sections) {
         return new FinancialExplainInput(
@@ -231,6 +233,19 @@ class FinancialExplainValidatorTest {
         assertThat(validator.validate(out, input).failedRules()).contains("7");
     }
 
+    @Test
+    void rule7FailsWhenFlowFactInsideHistory() {
+        FinancialExplainInput base = baseInput(List.of("overview", "history"));
+        FinancialExplainInput input = new FinancialExplainInput(base.company(), base.latest(), base.changeStatus(),
+                base.sections(), base.periods(),
+                List.of(REVENUE, REVENUE_YOY, OPERATING_INCOME, OPERATING_MARGIN, OPERATING_LOSS_RUN),
+                base.signals(), base.groups(), base.unavailable(), base.doNotMention());
+        FinancialExplainOutput out = output("{per.2026-01.Q2} 상태예요.", null, null,
+                "{fin.operating_loss_run.2026-01.Q2}째 적자가 이어지고 있어요.");
+
+        assertThat(validator.validate(out, input).failedRules()).contains("7");
+    }
+
     // ---- 규칙 8: doNotMention·unavailable 지표 이름 없음 ----
 
     @Test
@@ -247,6 +262,19 @@ class FinancialExplainValidatorTest {
         FinancialExplainOutput out = output("영업이익률은 이번에 계산하지 않았어요.", null, null, null);
 
         assertThat(validator.validate(out, input).failedRules()).contains("8");
+    }
+
+    @Test
+    void rule8PassesForRevenueMentionWhenOnlyRevenueYoyIsUnavailable() {
+        // revenue_yoy만 unavailable(예: 비원화 NON_KRW)이어도 매출 원값(revenue)은 정상 사실이라 "매출"을
+        // 언급할 수 있어야 한다 — revenue_yoy를 "매출"에 묶어 막던 버그의 회귀 테스트.
+        FinancialExplainInput base = baseInput(List.of("overview"));
+        FinancialExplainInput input = new FinancialExplainInput(base.company(), base.latest(), base.changeStatus(),
+                base.sections(), base.periods(), base.facts(), base.signals(), base.groups(),
+                List.of(new FinancialExplainInput.Unavailable("revenue_yoy", "NON_KRW")), base.doNotMention());
+        FinancialExplainOutput out = output("매출은 {fin.revenue.2026-01.Q2}이었어요.", null, null, null);
+
+        assertThat(validator.validate(out, input).failedRules()).doesNotContain("8");
     }
 
     // ---- 규칙 9: 금지 표현 ----
