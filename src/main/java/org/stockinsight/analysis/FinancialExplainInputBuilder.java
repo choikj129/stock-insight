@@ -36,7 +36,7 @@ import org.stockinsight.signal.SignalType;
 @Service
 public class FinancialExplainInputBuilder {
 
-    public static final String INPUT_BUILDER_VERSION = "fx-input-1";
+    public static final String INPUT_BUILDER_VERSION = "fx-input-2";
 
     private static final String KRW = "KRW";
     private static final int MAX_PAST_SIGNALS = 4;
@@ -170,7 +170,7 @@ public class FinancialExplainInputBuilder {
                 .map(ValueSnapshot.FactSnapshot::receiptNo)
                 .filter(java.util.Objects::nonNull)
                 .collect(java.util.stream.Collectors.toCollection(LinkedHashSet::new));
-        String fingerprint = Fingerprint.compute(receiptNos, selection.ordered(), limitCodes, INPUT_BUILDER_VERSION);
+        String fingerprint = Fingerprint.compute(receiptNos, selection.ordered(), fc.unavailable, INPUT_BUILDER_VERSION);
         return Optional.of(new BuildResult(input, snapshot, fingerprint));
     }
 
@@ -456,9 +456,11 @@ public class FinancialExplainInputBuilder {
                 return;
             }
             PeriodKey latest = quartersDesc.get(0).key();
-            if (Math.abs(revenueRun) >= 2) {
+            // 최신 기간의 revenue_yoy를 줄 수 있을 때만 준다(D-41). 못 주면(금융형·비원화·기준값 미만 등) 흐름도 주지 않는다.
+            boolean latestRevenueYoyAvailable = facts.containsKey("fin.revenue_yoy." + latest.displayKey());
+            if (latestRevenueYoyAvailable && Math.abs(revenueRun) >= 2) {
                 label(latest, false);
-                put(latest, "revenue_yoy_run", "매출 증가율 같은 방향 지속 분기 수", BigDecimal.valueOf(revenueRun), "분기", null, null);
+                put(latest, "revenue_yoy_run", "매출 같은 방향 연속 분기 수", BigDecimal.valueOf(revenueRun), "분기", null, null);
                 hasFlowFacts = true;
             }
             if (lossRun >= 2) {

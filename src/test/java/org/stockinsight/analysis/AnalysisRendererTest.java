@@ -61,16 +61,7 @@ class AnalysisRendererTest {
     void publishedAnalysisIsInvalidatedAssoonAsItsReferencedSignalIsWithdrawn() {
         seedQuarter("4,000,000,000", "2,000,000,000", "R1"); // +100%: FIN_REVENUE_CHANGE 활성
         signalJob.run();
-        FinancialExplainInputBuilder.BuildResult built = inputBuilder.build(companyId).orElseThrow();
-
-        NewAnalysis draft = new NewAnalysis(TargetType.COMPANY, String.valueOf(companyId), AnalysisKind.FINANCIAL_EXPLAIN,
-                built.fingerprint(), AnalysisStatus.DRAFT, null, built.input(), built.snapshot(), "fx-schema-1", "fx-v1",
-                "claude-sonnet-5", FinancialExplainInputBuilder.INPUT_BUILDER_VERSION, "fin-1", 100, 50, 0,
-                java.math.BigDecimal.ONE, null, 1);
-        long id = analysisService.save(draft, Instant.now());
-        analysisService.publish(id, TargetType.COMPANY, String.valueOf(companyId), AnalysisKind.FINANCIAL_EXPLAIN, Instant.now());
-        Analysis published = analysisService.findCurrent(TargetType.COMPANY, String.valueOf(companyId), AnalysisKind.FINANCIAL_EXPLAIN)
-                .orElseThrow();
+        Analysis published = publish(inputBuilder.build(companyId).orElseThrow());
 
         assertThat(renderer.isInvalidated(published, companyId)).isFalse();
 
@@ -79,6 +70,71 @@ class AnalysisRendererTest {
         signalJob.run();
 
         assertThat(renderer.isInvalidated(published, companyId)).isTrue();
+    }
+
+    @Test
+    void newQuarterArrivalAloneDoesNotInvalidate() {
+        // D-42: 새 보고서 도착만으로는 내리지 않는다. 참조한 신호·사실이 그대로면 무효화가 아니다.
+        seedQuarter("4,000,000,000", "2,000,000,000", "R1");
+        signalJob.run();
+        Analysis published = publish(inputBuilder.build(companyId).orElseThrow());
+        assertThat(renderer.isInvalidated(published, companyId)).isFalse();
+
+        // 다음 분기(반기) 보고서가 새로 들어온다. Q1 신호·사실은 그대로다.
+        List<RawAccountLine> h1 = List.of(
+                line("BS", "유동자산", "1", "2026.06.30 현재", "3,200,000,000", "2,600,000,000", "R2"),
+                line("BS", "자산총계", "5", "2026.06.30 현재", "9,200,000,000", "8,200,000,000", "R2"),
+                line("BS", "부채총계", "9", "2026.06.30 현재", "4,100,000,000", "3,600,000,000", "R2"),
+                line("BS", "자본총계", "13", "2026.06.30 현재", "5,100,000,000", "4,600,000,000", "R2"),
+                line("IS", "매출액", "23", "2026.01.01 ~ 2026.06.30", "2,100,000,000", "1,900,000,000", "R2"),
+                line("IS", "영업이익", "27", "2026.01.01 ~ 2026.06.30", "300,000,000", "250,000,000", "R2"));
+        financialService.replace(companyId, 2026, "11012", h1, null);
+        signalJob.run();
+
+        assertThat(renderer.isInvalidated(published, companyId)).isFalse();
+    }
+
+    @Test
+    void severityOrRuleVersionChangeAloneDoesNotInvalidate() {
+        // D-42: 참조 신호의 심각도·규칙 버전 변경, 활성→이력 전환은 무효화 조건이 아니다(방향 변경·철회만 본다).
+        seedQuarter("4,000,000,000", "2,000,000,000", "R1");
+        signalJob.run();
+        Analysis published = publish(inputBuilder.build(companyId).orElseThrow());
+        assertThat(renderer.isInvalidated(published, companyId)).isFalse();
+
+        jdbc.sql("update company_signal set severity = 'LOW', rule_version = 'fin-9', status = 'PAST' "
+                        + "where company_id = :companyId and signal_type = 'FIN_REVENUE_CHANGE' and direction = 'POSITIVE'")
+                .param("companyId", companyId)
+                .update();
+
+        assertThat(renderer.isInvalidated(published, companyId)).isFalse();
+    }
+
+    @Test
+    void referencedSignalDirectionChangeInvalidates() {
+        // D-42: 참조한 신호의 방향이 바뀌면(철회가 아니어도) 무효화한다.
+        seedQuarter("4,000,000,000", "2,000,000,000", "R1");
+        signalJob.run();
+        Analysis published = publish(inputBuilder.build(companyId).orElseThrow());
+        assertThat(renderer.isInvalidated(published, companyId)).isFalse();
+
+        jdbc.sql("update company_signal set direction = 'NEGATIVE' "
+                        + "where company_id = :companyId and signal_type = 'FIN_REVENUE_CHANGE' and direction = 'POSITIVE'")
+                .param("companyId", companyId)
+                .update();
+
+        assertThat(renderer.isInvalidated(published, companyId)).isTrue();
+    }
+
+    private Analysis publish(FinancialExplainInputBuilder.BuildResult built) {
+        NewAnalysis draft = new NewAnalysis(TargetType.COMPANY, String.valueOf(companyId), AnalysisKind.FINANCIAL_EXPLAIN,
+                built.fingerprint(), AnalysisStatus.DRAFT, null, built.input(), built.snapshot(), "fx-schema-1", "fx-v1",
+                "claude-sonnet-5", FinancialExplainInputBuilder.INPUT_BUILDER_VERSION, "fin-2", 100, 50, 0,
+                java.math.BigDecimal.ONE, null, 1);
+        long id = analysisService.save(draft, Instant.now());
+        analysisService.publish(id, TargetType.COMPANY, String.valueOf(companyId), AnalysisKind.FINANCIAL_EXPLAIN, Instant.now());
+        return analysisService.findCurrent(TargetType.COMPANY, String.valueOf(companyId), AnalysisKind.FINANCIAL_EXPLAIN)
+                .orElseThrow();
     }
 
     private void seedQuarter(String current, String prior, String receiptNo) {

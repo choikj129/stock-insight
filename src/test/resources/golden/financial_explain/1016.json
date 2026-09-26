@@ -28,19 +28,19 @@
   }, {
     "key" : "fin.operating_income_prior.2026-01.Q2",
     "name" : "영업이익(전년 동기)",
-    "display" : "7984.9억원",
+    "display" : "7,984.9억원",
     "sign" : "+",
     "period" : "2026-01.Q2"
   }, {
     "key" : "fin.net_income.2026-01.Q2",
     "name" : "당기순이익",
-    "display" : "8768.6억원",
+    "display" : "8,768.6억원",
     "sign" : "+",
     "period" : "2026-01.Q2"
   }, {
     "key" : "fin.net_income_prior.2026-01.Q2",
     "name" : "당기순이익(전년 동기)",
-    "display" : "6523.1억원",
+    "display" : "6,523.1억원",
     "sign" : "+",
     "period" : "2026-01.Q2"
   }, {

@@ -9,16 +9,17 @@ import java.util.List;
 import org.stockinsight.signal.CompanySignal;
 
 /**
- * 재무 쉬운 설명의 지문(D-40). 입력에 쓴 원천 식별자 집합의 해시다. 값의 해시가 아니므로(D-08) 표시 형식만 바뀌면
- * 지문은 그대로다. 정정(공시번호 변경), 신호 상태·방향·심각도·규칙 버전 변경, 데이터 한계 변경, 입력 구성 버전 변경에만 바뀐다.
+ * 재무 쉬운 설명의 지문(D-40, D-42). 입력에 쓴 원천 식별자 집합의 해시다. 값의 해시가 아니므로(D-08)
+ * 표시 형식만 바뀌면 지문은 그대로다. 정정(공시번호 변경), 신호 상태·방향·심각도·규칙 버전 변경, {@code unavailable}
+ * 집합 변경, 입력 구성 버전 변경에만 바뀐다. 데이터 한계 신호 코드 자체(예: 날짜로 바뀌는 "최신 재무 미확인")는 넣지 않는다.
  */
 final class Fingerprint {
 
     private Fingerprint() {
     }
 
-    static String compute(Collection<String> receiptNos, List<CompanySignal> signals, List<String> limitCodes,
-            String inputBuilderVersion) {
+    static String compute(Collection<String> receiptNos, List<CompanySignal> signals,
+            List<FinancialExplainInput.Unavailable> unavailable, String inputBuilderVersion) {
         StringBuilder sb = new StringBuilder();
         receiptNos.stream().sorted().forEach(r -> sb.append("R:").append(r).append(';'));
         signals.stream()
@@ -26,7 +27,11 @@ final class Fingerprint {
                         + s.severity() + ":" + s.ruleVersion())
                 .sorted()
                 .forEach(n -> sb.append(n).append(';'));
-        limitCodes.stream().sorted().forEach(c -> sb.append("L:").append(c).append(';'));
+        unavailable.stream()
+                .map(u -> u.metric() + ":" + u.reason())
+                .distinct()
+                .sorted()
+                .forEach(u -> sb.append("U:").append(u).append(';'));
         sb.append("B:").append(inputBuilderVersion);
         return sha256(sb.toString());
     }

@@ -22,25 +22,25 @@
   "facts" : [ {
     "key" : "fin.revenue.2026-01.Q2",
     "name" : "매출액",
-    "display" : "364555549CNY",
+    "display" : "3.6억위안",
     "sign" : "+",
     "period" : "2026-01.Q2"
   }, {
     "key" : "fin.revenue_prior.2026-01.Q2",
     "name" : "매출액(전년 동기)",
-    "display" : "234009193CNY",
+    "display" : "2.3억위안",
     "sign" : "+",
     "period" : "2026-01.Q2"
   }, {
     "key" : "fin.operating_income.2026-01.Q2",
     "name" : "영업이익",
-    "display" : "65441255CNY",
+    "display" : "6,544만위안",
     "sign" : "+",
     "period" : "2026-01.Q2"
   }, {
     "key" : "fin.operating_income_prior.2026-01.Q2",
     "name" : "영업이익(전년 동기)",
-    "display" : "-95380132CNY",
+    "display" : "-9,538만위안",
     "sign" : "-",
     "period" : "2026-01.Q2"
   }, {
@@ -64,25 +64,25 @@
   }, {
     "key" : "fin.net_income.2026-01.Q2",
     "name" : "당기순이익",
-    "display" : "64749173CNY",
+    "display" : "6,475만위안",
     "sign" : "+",
     "period" : "2026-01.Q2"
   }, {
     "key" : "fin.net_income_prior.2026-01.Q2",
     "name" : "당기순이익(전년 동기)",
-    "display" : "-174135627CNY",
+    "display" : "-1.7억위안",
     "sign" : "-",
     "period" : "2026-01.Q2"
   }, {
     "key" : "fin.revenue.2025-01.Q4",
     "name" : "매출액",
-    "display" : "926741227CNY",
+    "display" : "9.3억위안",
     "sign" : "+",
     "period" : "2025-01.Q4"
   }, {
     "key" : "fin.operating_income.2025-01.Q4",
     "name" : "영업이익",
-    "display" : "-310836113CNY",
+    "display" : "-3.1억위안",
     "sign" : "-",
     "period" : "2025-01.Q4"
   }, {
@@ -94,31 +94,31 @@
   }, {
     "key" : "fin.net_income.2025-01.Q4",
     "name" : "당기순이익",
-    "display" : "-388563337CNY",
+    "display" : "-3.9억위안",
     "sign" : "-",
     "period" : "2025-01.Q4"
   }, {
     "key" : "fin.total_assets.2026-01.Q2",
     "name" : "자산총계",
-    "display" : "1805254206CNY",
+    "display" : "18.1억위안",
     "sign" : "+",
     "period" : "2026-01.Q2"
   }, {
     "key" : "fin.total_liabilities.2026-01.Q2",
     "name" : "부채총계",
-    "display" : "397902684CNY",
+    "display" : "4.0억위안",
     "sign" : "+",
     "period" : "2026-01.Q2"
   }, {
     "key" : "fin.total_equity.2026-01.Q2",
     "name" : "자본총계",
-    "display" : "1407351522CNY",
+    "display" : "14.1억위안",
     "sign" : "+",
     "period" : "2026-01.Q2"
   }, {
     "key" : "fin.capital_stock.2026-01.Q2",
     "name" : "자본금",
-    "display" : "1717400596CNY",
+    "display" : "17.2억위안",
     "sign" : "+",
     "period" : "2026-01.Q2"
   }, {
@@ -143,12 +143,6 @@
     "key" : "fin.impairment_ratio.2026-01.Q2",
     "name" : "자본잠식률",
     "display" : "+18.1%",
-    "sign" : "+",
-    "period" : "2026-01.Q2"
-  }, {
-    "key" : "fin.revenue_yoy_run.2026-01.Q2",
-    "name" : "매출 증가율 같은 방향 지속 분기 수",
-    "display" : "2분기",
     "sign" : "+",
     "period" : "2026-01.Q2"
   } ],

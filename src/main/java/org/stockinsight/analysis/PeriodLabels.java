@@ -3,6 +3,8 @@ package org.stockinsight.analysis;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.util.Locale;
+import java.util.Map;
 
 import org.stockinsight.financial.PeriodKey;
 
@@ -50,20 +52,45 @@ final class PeriodLabels {
         return (value.signum() >= 0 ? "+" : "") + value.toPlainString();
     }
 
+    private static final BigDecimal TRILLION = BigDecimal.valueOf(1_000_000_000_000L);
+    private static final BigDecimal HUNDRED_MILLION = BigDecimal.valueOf(100_000_000L);
+    /** 만 단위 문턱값이자, 위 단위로 반올림 되어 올라가는 경계(10000)이기도 하다. */
+    private static final BigDecimal TEN_THOUSAND = BigDecimal.valueOf(10_000L);
+
+    /** 통화명(이름이 없는 통화는 코드를 그대로 쓴다, D-41). */
+    private static final Map<String, String> CURRENCY_NAMES = Map.of(
+            "KRW", "원", "CNY", "위안", "USD", "달러", "JPY", "엔", "GBP", "파운드");
+
+    /**
+     * 통화와 관계없이 한국어 수 단위(조·억·만)로 줄이고 통화명을 붙인다. 환산하지 않는다(D-41).
+     * 반올림으로 한 단위의 끝(10000)에 닿으면 그 위 단위로 올린다(예: 9,999.95억 → 1.0조).
+     */
     private static String formatAmount(BigDecimal value, String currency) {
-        if (!"KRW".equals(currency)) {
-            return value.toPlainString() + currency;
-        }
         BigDecimal abs = value.abs();
-        BigDecimal trillion = BigDecimal.valueOf(1_000_000_000_000L);
-        BigDecimal hundredMillion = BigDecimal.valueOf(100_000_000L);
         String sign = value.signum() < 0 ? "-" : "";
-        if (abs.compareTo(trillion) >= 0) {
-            return sign + abs.divide(trillion, 1, RoundingMode.HALF_UP).toPlainString() + "조원";
+        String suffix = CURRENCY_NAMES.containsKey(currency) ? CURRENCY_NAMES.get(currency) : " " + currency;
+
+        if (abs.compareTo(TRILLION) >= 0) {
+            return sign + grouped(abs.divide(TRILLION, 1, RoundingMode.HALF_UP), 1) + "조" + suffix;
         }
-        if (abs.compareTo(hundredMillion) >= 0) {
-            return sign + abs.divide(hundredMillion, 1, RoundingMode.HALF_UP).toPlainString() + "억원";
+        if (abs.compareTo(HUNDRED_MILLION) >= 0) {
+            BigDecimal eok = abs.divide(HUNDRED_MILLION, 1, RoundingMode.HALF_UP);
+            if (eok.compareTo(TEN_THOUSAND) >= 0) {
+                return sign + grouped(abs.divide(TRILLION, 1, RoundingMode.HALF_UP), 1) + "조" + suffix;
+            }
+            return sign + grouped(eok, 1) + "억" + suffix;
         }
-        return sign + abs.toPlainString() + "원";
+        if (abs.compareTo(TEN_THOUSAND) >= 0) {
+            BigDecimal man = abs.divide(TEN_THOUSAND, 0, RoundingMode.HALF_UP);
+            if (man.compareTo(TEN_THOUSAND) >= 0) {
+                return sign + grouped(abs.divide(HUNDRED_MILLION, 1, RoundingMode.HALF_UP), 1) + "억" + suffix;
+            }
+            return sign + grouped(man, 0) + "만" + suffix;
+        }
+        return sign + grouped(abs.setScale(0, RoundingMode.HALF_UP), 0) + suffix;
+    }
+
+    private static String grouped(BigDecimal value, int decimals) {
+        return String.format(Locale.US, "%,." + decimals + "f", value);
     }
 }

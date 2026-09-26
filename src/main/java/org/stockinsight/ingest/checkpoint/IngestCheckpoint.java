@@ -1,6 +1,7 @@
 package org.stockinsight.ingest.checkpoint;
 
 import java.time.Instant;
+import java.time.LocalDate;
 
 public record IngestCheckpoint(
         String source,
@@ -10,7 +11,9 @@ public record IngestCheckpoint(
         String message,
         int attemptCount,
         Instant lastAttemptAt,
-        Instant lastSuccessAt) {
+        Instant lastSuccessAt,
+        /** 소스 버전이 그대로여도 이 날짜가 지나면 다시 확인해야 한다. 시간만으로 판정이 바뀌는 작업에만 쓴다(D-43). */
+        LocalDate nextCheckAt) {
 
     public enum Result {
         SUCCESS,

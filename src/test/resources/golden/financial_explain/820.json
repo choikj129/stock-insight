@@ -147,7 +147,7 @@
     "period" : "2026-01.Q2"
   }, {
     "key" : "fin.revenue_yoy_run.2026-01.Q2",
-    "name" : "매출 증가율 같은 방향 지속 분기 수",
+    "name" : "매출 같은 방향 연속 분기 수",
     "display" : "2분기",
     "sign" : "+",
     "period" : "2026-01.Q2"

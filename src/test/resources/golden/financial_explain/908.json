@@ -28,7 +28,7 @@
   }, {
     "key" : "fin.revenue_prior.2026-01.Q2",
     "name" : "매출액(전년 동기)",
-    "display" : "1565.1억원",
+    "display" : "1,565.1억원",
     "sign" : "+",
     "period" : "2026-01.Q2"
   }, {
@@ -82,7 +82,7 @@
   }, {
     "key" : "fin.revenue.2025-01.Q4",
     "name" : "매출액",
-    "display" : "6413.1억원",
+    "display" : "6,413.1억원",
     "sign" : "+",
     "period" : "2025-01.Q4"
   }, {
@@ -106,25 +106,25 @@
   }, {
     "key" : "fin.net_income.2025-01.Q4",
     "name" : "당기순이익",
-    "display" : "-1664.1억원",
+    "display" : "-1,664.1억원",
     "sign" : "-",
     "period" : "2025-01.Q4"
   }, {
     "key" : "fin.total_assets.2026-01.Q2",
     "name" : "자산총계",
-    "display" : "3758.2억원",
+    "display" : "3,758.2억원",
     "sign" : "+",
     "period" : "2026-01.Q2"
   }, {
     "key" : "fin.total_liabilities.2026-01.Q2",
     "name" : "부채총계",
-    "display" : "5235.9억원",
+    "display" : "5,235.9억원",
     "sign" : "+",
     "period" : "2026-01.Q2"
   }, {
     "key" : "fin.total_equity.2026-01.Q2",
     "name" : "자본총계",
-    "display" : "-1477.8억원",
+    "display" : "-1,477.8억원",
     "sign" : "-",
     "period" : "2026-01.Q2"
   }, {
@@ -135,7 +135,7 @@
     "period" : "2026-01.Q2"
   }, {
     "key" : "fin.revenue_yoy_run.2026-01.Q2",
-    "name" : "매출 증가율 같은 방향 지속 분기 수",
+    "name" : "매출 같은 방향 연속 분기 수",
     "display" : "2분기",
     "sign" : "-",
     "period" : "2026-01.Q2"

@@ -108,6 +108,12 @@ public class FinancialService {
         return repository.lastChangedByCompanyId();
     }
 
+    /** 그 기간·기준 보고서의 현재 공시번호. 보고서가 없어졌으면 빈 값이다(무효화 판정, D-42). */
+    @Transactional(readOnly = true)
+    public Optional<String> currentReceiptNo(long companyId, LocalDate periodEnd, String fsDiv) {
+        return repository.findReceiptNoByPeriodEnd(companyId, periodEnd, fsDiv);
+    }
+
     private boolean sameContent(ExistingReport existing, LocalDate fiscalYearStart, LocalDate periodEnd,
             String currency, String receiptNo, List<StoredFinancialLine> newLines) {
         if (!existing.fiscalYearStart().equals(fiscalYearStart) || !existing.periodEnd().equals(periodEnd)

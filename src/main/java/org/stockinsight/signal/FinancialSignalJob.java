@@ -92,8 +92,12 @@ public class FinancialSignalJob {
         for (Map.Entry<Long, Instant> entry : lastChangedByCompanyId.entrySet()) {
             String sourceVersion = sourceVersion(entry.getValue());
             IngestCheckpoint checkpoint = checkpointByKey.get(String.valueOf(entry.getKey()));
-            if (checkpoint == null || checkpoint.result() == IngestCheckpoint.Result.ERROR
-                    || !sourceVersion.equals(checkpoint.sourceVersion())) {
+            boolean dueByChange = checkpoint == null || checkpoint.result() == IngestCheckpoint.Result.ERROR
+                    || !sourceVersion.equals(checkpoint.sourceVersion());
+            // "최신 재무 미확인"이 시간만으로 바뀌는 날이 지난 기업도 대상에 넣는다(재무는 그대로다, D-43).
+            boolean dueByRecheck = checkpoint != null && checkpoint.nextCheckAt() != null
+                    && !today.isBefore(checkpoint.nextCheckAt());
+            if (dueByChange || dueByRecheck) {
                 due.add(entry.getKey());
             }
         }
@@ -106,10 +110,13 @@ public class FinancialSignalJob {
             try {
                 CompanySignalService.ApplyResult result = transaction.execute(status -> {
                     FinancialSummary summary = summaryService.summarize(companyId);
-                    List<SignalDraft> drafts = FinancialSignalCalculator.calculate(summary, today);
-                    CompanySignalService.ApplyResult r = signalService.applyFinancial(companyId, drafts, FinancialRuleCatalog.RULE_VERSION);
+                    FinancialSignalCalculator.CalculationResult calculation = FinancialSignalCalculator.calculate(summary, today);
+                    String latestKey = summary.quarters().isEmpty() ? null : summary.quarters().get(0).key().stateBasisKey();
+                    CompanySignalService.ApplyResult r = signalService.applyFinancial(companyId, calculation.drafts(),
+                            FinancialRuleCatalog.RULE_VERSION, latestKey);
                     checkpoints.record(CHECKPOINT_SOURCE, String.valueOf(companyId), sourceVersion,
-                            IngestCheckpoint.Result.SUCCESS, "반영 %d·철회 %d".formatted(r.applied(), r.withdrawn()), attemptedAt);
+                            IngestCheckpoint.Result.SUCCESS, "반영 %d·철회 %d".formatted(r.applied(), r.withdrawn()), attemptedAt,
+                            calculation.staleRecheckAt());
                     return r;
                 });
                 progress.processed++;

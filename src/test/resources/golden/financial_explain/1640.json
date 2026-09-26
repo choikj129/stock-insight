@@ -22,25 +22,25 @@
   "facts" : [ {
     "key" : "fin.revenue.2025-07.Q4",
     "name" : "매출액",
-    "display" : "17984761USD",
+    "display" : "1,798만달러",
     "sign" : "+",
     "period" : "2025-07.Q4"
   }, {
     "key" : "fin.revenue_prior.2025-07.Q4",
     "name" : "매출액(전년 동기)",
-    "display" : "10215103USD",
+    "display" : "1,022만달러",
     "sign" : "+",
     "period" : "2025-07.Q4"
   }, {
     "key" : "fin.operating_income.2025-07.Q4",
     "name" : "영업이익",
-    "display" : "-64575387USD",
+    "display" : "-6,458만달러",
     "sign" : "-",
     "period" : "2025-07.Q4"
   }, {
     "key" : "fin.operating_income_prior.2025-07.Q4",
     "name" : "영업이익(전년 동기)",
-    "display" : "-48025250USD",
+    "display" : "-4,803만달러",
     "sign" : "-",
     "period" : "2025-07.Q4"
   }, {
@@ -64,25 +64,25 @@
   }, {
     "key" : "fin.net_income.2025-07.Q4",
     "name" : "당기순이익",
-    "display" : "-84774754USD",
+    "display" : "-8,477만달러",
     "sign" : "-",
     "period" : "2025-07.Q4"
   }, {
     "key" : "fin.net_income_prior.2025-07.Q4",
     "name" : "당기순이익(전년 동기)",
-    "display" : "2974299USD",
+    "display" : "297만달러",
     "sign" : "+",
     "period" : "2025-07.Q4"
   }, {
     "key" : "fin.revenue.2024-07.Q4",
     "name" : "매출액",
-    "display" : "10215103USD",
+    "display" : "1,022만달러",
     "sign" : "+",
     "period" : "2024-07.Q4"
   }, {
     "key" : "fin.operating_income.2024-07.Q4",
     "name" : "영업이익",
-    "display" : "-48025250USD",
+    "display" : "-4,803만달러",
     "sign" : "-",
     "period" : "2024-07.Q4"
   }, {
@@ -94,31 +94,31 @@
   }, {
     "key" : "fin.net_income.2024-07.Q4",
     "name" : "당기순이익",
-    "display" : "2974299USD",
+    "display" : "297만달러",
     "sign" : "+",
     "period" : "2024-07.Q4"
   }, {
     "key" : "fin.total_assets.2025-07.Q4",
     "name" : "자산총계",
-    "display" : "478545810USD",
+    "display" : "4.8억달러",
     "sign" : "+",
     "period" : "2025-07.Q4"
   }, {
     "key" : "fin.total_liabilities.2025-07.Q4",
     "name" : "부채총계",
-    "display" : "151334608USD",
+    "display" : "1.5억달러",
     "sign" : "+",
     "period" : "2025-07.Q4"
   }, {
     "key" : "fin.total_equity.2025-07.Q4",
     "name" : "자본총계",
-    "display" : "327211202USD",
+    "display" : "3.3억달러",
     "sign" : "+",
     "period" : "2025-07.Q4"
   }, {
     "key" : "fin.capital_stock.2025-07.Q4",
     "name" : "자본금",
-    "display" : "525727248USD",
+    "display" : "5.3억달러",
     "sign" : "+",
     "period" : "2025-07.Q4"
   }, {

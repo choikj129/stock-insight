@@ -173,6 +173,58 @@ class FinancialExplainInputBuilderTest {
     }
 
     @Test
+    void nonKrwCompanyOmitsRevenueGrowthButKeepsBaseFreeRatios() {
+        // 비원화는 매출 증가율(원화 기준값 필요)을 주지 않지만, 기준값이 필요 없는 영업이익률·부채비율은 그대로 준다(D-41).
+        List<RawAccountLine> rows = List.of(
+                line("BS", "유동자산", "1", "2026.03.31 현재", "3,000,000,000", "2,500,000,000"),
+                line("BS", "자산총계", "5", "2026.03.31 현재", "9,000,000,000", "8,000,000,000"),
+                line("BS", "부채총계", "9", "2026.03.31 현재", "4,000,000,000", "3,500,000,000"),
+                line("BS", "자본총계", "13", "2026.03.31 현재", "5,000,000,000", "4,500,000,000"),
+                line("IS", "매출액", "23", "2026.01.01 ~ 2026.03.31", "2,000,000,000", "1,500,000,000"),
+                line("IS", "영업이익", "27", "2026.01.01 ~ 2026.03.31", "500,000,000", "400,000,000"));
+        List<RawAccountLine> nonKrwRows = rows.stream()
+                .map(r -> new RawAccountLine(r.fsDiv(), r.statement(), r.accountName(), r.ord(), r.currentPeriod(),
+                        r.currentAmount(), r.currentCumulativeAmount(), r.priorAmount(), r.priorCumulativeAmount(),
+                        r.prior2Amount(), "CNY", r.receiptNo()))
+                .toList();
+        financialService.replace(companyId, 2026, "11013", nonKrwRows, null);
+        signalJob.run();
+
+        FinancialExplainInput input = builder.build(companyId).orElseThrow().input();
+
+        assertThat(input.company().currency()).isEqualTo("CNY");
+        assertThat(input.facts()).anySatisfy(f -> {
+            assertThat(f.key()).isEqualTo("fin.revenue." + input.latest().period());
+            assertThat(f.display()).endsWith("위안");
+        });
+        assertThat(input.facts()).noneMatch(f -> f.key().startsWith("fin.revenue_yoy"));
+        assertThat(input.unavailable()).anySatisfy(u -> {
+            assertThat(u.metric()).isEqualTo("revenue_yoy");
+            assertThat(u.reason()).isEqualTo("NON_KRW");
+        });
+        // 영업이익률은 매출 기준값이 필요 없는 비율이라 비원화도 그대로 준다.
+        assertThat(input.facts()).anyMatch(f -> f.key().startsWith("fin.operating_margin."));
+    }
+
+    @Test
+    void revenueYoyRunOmittedWhenLatestQuarterRevenueYoyUnavailable() {
+        // Q1: 정상 증가(+9%), Q2(최신): 전년 동기가 기준값(10억) 미만이라 revenue_yoy 자체가 없다.
+        // 부호만 보면 2분기 연속 증가라 흐름 조건(2개 이상)을 만족하지만, 최신 기간에 revenue_yoy를 줄 수 없으므로
+        // revenue_yoy_run도 주지 않아야 한다(D-41).
+        seedGeneralQuarter("11013", "2026.01.01 ~ 2026.03.31", "2026.03.31 현재", "1,200,000,000", "1,100,000,000", "R1");
+        seedGeneralQuarter("11012", "2026.01.01 ~ 2026.06.30", "2026.06.30 현재", "600,000,000", "500,000,000", "R2");
+        signalJob.run();
+
+        FinancialExplainInput input = builder.build(companyId).orElseThrow().input();
+
+        assertThat(input.facts()).noneMatch(f -> f.key().startsWith("fin.revenue_yoy_run"));
+        assertThat(input.unavailable()).anySatisfy(u -> {
+            assertThat(u.metric()).isEqualTo("revenue_yoy");
+            assertThat(u.reason()).isEqualTo("SMALL_BASE");
+        });
+    }
+
+    @Test
     void buildIsDeterministicForSameData() {
         seedGeneralQuarter("11013", "2026.01.01 ~ 2026.03.31", "2026.03.31 현재", "2,000,000,000", "1,500,000,000", "R1");
         signalJob.run();

@@ -89,6 +89,22 @@ class CompanySignalRepository {
                 .update();
     }
 
+    /** 이번 판정에 없지만 최신 기간이 그 이후로 넘어가 해소된 자연키를 이력으로 둔다(D-43, D-36). */
+    int markPast(long companyId, String signalType, String basisKey, Instant now) {
+        return jdbc.sql("""
+                        update company_signal
+                           set status = 'PAST', last_evaluated_at = :now,
+                               status_changed_at = case when status <> 'PAST' then :now else status_changed_at end
+                         where company_id = :companyId and signal_type = :signalType and basis_key = :basisKey
+                           and status <> 'PAST'
+                        """)
+                .param("companyId", companyId)
+                .param("signalType", signalType)
+                .param("basisKey", basisKey)
+                .param("now", Timestamp.from(now))
+                .update();
+    }
+
     List<CompanySignal> findByCompany(long companyId) {
         return jdbc.sql("""
                         select signal_type, basis_key, nature, direction, severity, occurred_on, persistence,

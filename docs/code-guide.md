@@ -3,7 +3,7 @@
 | 항목 | 내용 |
 |---|---|
 | 상태 | 현재 코드 기준 (코드와 함께 갱신하는 기준 문서) |
-| 기준 시점 | 2026-09-25, `main` 작업 트리 (커밋되지 않은 변경 포함) |
+| 기준 시점 | 2026-09-26, `main` 작업 트리 (커밋되지 않은 변경 포함) |
 | 관련 문서 | [제품 정의](product.md), [시스템 설계](architecture.md), [데이터·AI 분석 명세](ai-analysis.md), [설계 결정 기록](decisions.md), [구현 계획](implementation-plan.md) |
 
 이 문서는 **지금 있는 코드가 어떻게 구성되어 있고 실제로 어떤 순서로 실행되는지**를 설명한다. 무엇을 왜 만드는지는 product.md, 목표 설계는 architecture.md·ai-analysis.md, 진행 현황은 implementation-plan.md가 기준이다. 이 문서는 설계가 아니라 **구현 현황의 기준**이다. 설계 문서에 있어도 코드에 없는 것은 여기에 "없음"으로 적는다.
@@ -99,7 +99,7 @@ stockInsight/
     │   ├── application.yml           공통 설정 (§8)
     │   ├── application-local.yml     로컬: compose DB, 비밀값 파일(optional)
     │   ├── application-prod.yml      운영: 환경 변수 DB, 비밀값 파일(필수), 스케줄러 켜짐
-    │   ├── db/migration/V1~V5        Flyway 스키마 (§10)
+    │   ├── db/migration/V1~V6        Flyway 스키마 (§10)
     │   └── prompts/                  AI 시스템 프롬프트: common/style.md, financial_explain/v1.md·schema.json (§4.9)
     ├── test/java/org/stockinsight/   테스트 (§14)
     ├── test/resources/dart/          실제 OpenDART 응답 샘플 (출처는 그 폴더의 README.md)
@@ -187,8 +187,8 @@ company, disclosure, financial ─▶ (다른 도메인 패키지를 쓰지 않�
 
 | 클래스 | 책임 |
 |---|---|
-| [IngestCheckpoint](../src/main/java/org/stockinsight/ingest/checkpoint/IngestCheckpoint.java) | (소스, 대상 키)별 마지막 결과: 원천 버전, `SUCCESS`/`NO_DATA`/`ERROR`, 연속 오류 횟수, 마지막 시도·성공 시각 |
-| [IngestCheckpointRepository](../src/main/java/org/stockinsight/ingest/checkpoint/IngestCheckpointRepository.java) | `findAllBySource(source)` → `Map<대상 키, 체크포인트>`. `record(...)` = `insert ... on conflict do update`. ERROR면 `attempt_count + 1`, 아니면 0. 성공 시각은 SUCCESS일 때만 갱신 |
+| [IngestCheckpoint](../src/main/java/org/stockinsight/ingest/checkpoint/IngestCheckpoint.java) | (소스, 대상 키)별 마지막 결과: 원천 버전, `SUCCESS`/`NO_DATA`/`ERROR`, 연속 오류 횟수, 마지막 시도·성공 시각, **`nextCheckAt`**(선택, D-43) |
+| [IngestCheckpointRepository](../src/main/java/org/stockinsight/ingest/checkpoint/IngestCheckpointRepository.java) | `findAllBySource(source)` → `Map<대상 키, 체크포인트>`. `record(...)` = `insert ... on conflict do update`(6개 인자 오버로드는 `nextCheckAt=null`로 위임). ERROR면 `attempt_count + 1`, 아니면 0. 성공 시각은 SUCCESS일 때만 갱신. `next_check_at`은 넘긴 값으로 그대로 덮어쓴다(null이면 지운다) |
 
 작업별 체크포인트 사용
 
@@ -197,7 +197,9 @@ company, disclosure, financial ─▶ (다른 도메인 패키지를 쓰지 않�
 | `DART_COMPANY` | `00126380` (고유번호) | 고유번호 파일의 변경일 | `CompanySyncJob` |
 | `DART_DISCLOSURE` | `2026-08-14:A` (날짜:유형) | 없음(null) | `DisclosureSyncJob` |
 | `DART_FINANCIAL` | `00126380:2026:11012` | 처리한 계기 공시번호 중 최댓값(초기 적재는 null) | `FinancialSyncJob` |
-| `SIGNAL_FINANCIAL` | `123` (기업 ID) | `fin-1:<재무 마지막 변경 시각>` | `FinancialSignalJob` |
+| `SIGNAL_FINANCIAL` | `123` (기업 ID) | `fin-2:<재무 마지막 변경 시각>`. `nextCheckAt`을 씀(D-43): "최신 재무 미확인"이 아직 아니면 시간만으로 활성이 되는 날, 이미 활성이면 null | `FinancialSignalJob` |
+
+`FinancialSignalJob`의 대상 판정은 원천 버전이 바뀐 기업뿐 아니라 **`nextCheckAt`이 지난 기업**도 포함한다(재무 변경 없이도 시간만으로 재판정, D-43). 이미 불러온 체크포인트 맵으로만 판단하므로 추가 조회는 없다.
 
 ### 4.4 `ingest.company` / `ingest.disclosure` / `ingest.financial` — 수집 Job
 
@@ -245,12 +247,12 @@ Scheduler는 Job의 `run()`(공시는 `runToday()`도)을 부르기만 한다. �
 
 | 클래스 | 쪽 | 책임 |
 |---|---|---|
-| [FinancialService](../src/main/java/org/stockinsight/financial/FinancialService.java) | 저장 | `replace(companyId, bsnsYear, reportCode, rows, expectedPeriodEndMonth)`: 손익 행의 `thstrm_dt`로 기간 식별, 계기 기간 검증, 연결/별도별로 내용이 같으면 그대로 두고 다르면 삭제 후 삽입, 응답에서 빠진 `fs_div` 삭제. `lastChangedByCompanyId()`: 신호 재계산 대상 판단용 |
+| [FinancialService](../src/main/java/org/stockinsight/financial/FinancialService.java) | 저장 | `replace(companyId, bsnsYear, reportCode, rows, expectedPeriodEndMonth)`: 손익 행의 `thstrm_dt`로 기간 식별, 계기 기간 검증, 연결/별도별로 내용이 같으면 그대로 두고 다르면 삭제 후 삽입, 응답에서 빠진 `fs_div` 삭제. `lastChangedByCompanyId()`: 신호 재계산 대상 판단용. `currentReceiptNo(companyId, periodEnd, fsDiv)`: 계정 행을 읽지 않고 `financial_report`만 조회(D-42 무효화 판정용, 재무 요약 전체를 다시 만들지 않는다) |
 | [PeriodicReportName](../src/main/java/org/stockinsight/financial/PeriodicReportName.java) | 저장 | "사업/반기/분기보고서 (YYYY.MM)" → `QueryKey(bsnsYear, periodType, periodEndMonth)`. 분기보고서는 결산월 기준 +3개월이면 Q1, +9개월이면 Q3. 그 외 정기공시는 빈 값 |
 | `FinancialAmounts` | 저장 | 금액 문자열 파싱 (쉼표, 음수, `"-"`·빈 값 → null) |
 | `RawAccountLine` | 저장 | 수집기가 넘기는 계정 한 줄(문자열 그대로). `ingest`의 DTO에 `financial`이 의존하지 않도록 둔 경계 타입 |
 | `StoredFinancialLine`, `StoredFinancialReport` | 공용 | 저장된 계정 행(금액 `BigDecimal`)과 보고서 한 벌(행 포함) |
-| [FinancialRepository](../src/main/java/org/stockinsight/financial/FinancialRepository.java) | 공용 | package-private. 보고서·행 insert/delete/find, `findAllByCompany`(보고서+행 조인 한 번), `lastChangedByCompanyId` |
+| [FinancialRepository](../src/main/java/org/stockinsight/financial/FinancialRepository.java) | 공용 | package-private. 보고서·행 insert/delete/find, `findAllByCompany`(보고서+행 조인 한 번), `lastChangedByCompanyId`, `findReceiptNoByPeriodEnd`(가벼운 단일 조회, 행 없음) |
 | `PeriodType` | 공용 | `Q1`(11013), `H1`(11012), `Q3`(11014), `FY`(11011). `fromReportCode`, `reportCode()` |
 | `FinancialPeriodException`, `PeriodicReportNameException` | 저장 | 기간 식별 실패·기간 불일치, 보고서명 해석 실패 |
 | [FinancialSummaryService](../src/main/java/org/stockinsight/financial/FinancialSummaryService.java) | 해석 | `summarize(companyId)` → `FinancialSummary`. 최신 기간의 연결/별도·통화로 기준 고정(D-37), 최근 12분기(1·2·3분기 실제 + 4분기 파생) + 최근 3개 사업연도, 재무상태표 항등식 점검, 데이터 이상 플래그. 저장하지 않는다 |
@@ -261,12 +263,12 @@ Scheduler는 Job의 `run()`(공시는 `runToday()`도)을 부르기만 한다. �
 
 | 클래스 | 책임 |
 |---|---|
-| [FinancialSignalJob](../src/main/java/org/stockinsight/signal/FinancialSignalJob.java) | 재무가 바뀐 기업만 골라 기업 하나당 트랜잭션 하나로 요약 → 계산 → 반영. 철회 급증 경고 |
+| [FinancialSignalJob](../src/main/java/org/stockinsight/signal/FinancialSignalJob.java) | 재무가 바뀐 기업 + `nextCheckAt`이 지난 기업(D-43)만 골라 기업 하나당 트랜잭션 하나로 요약 → 계산 → 반영. 반영 직후 그 기업의 최신 기간 근거 키(`stateBasisKey()`, 재무가 없으면 null)를 `applyFinancial`에 넘긴다. 철회 급증 경고 |
 | `FinancialSignalScheduler`, `FinancialSignalProperties` | 실행 시점, `app.signal.financial-signal.*` |
-| [FinancialSignalCalculator](../src/main/java/org/stockinsight/signal/FinancialSignalCalculator.java) | `calculate(FinancialSummary, asOf)` → `List<SignalDraft>`. static 순수 함수. DB·Spring 없음 |
-| [FinancialRuleCatalog](../src/main/java/org/stockinsight/signal/FinancialRuleCatalog.java) | 문턱값·심각도 구간 상수와 `RULE_VERSION = "fin-1"`. 값을 바꾸면 버전을 올리고, 버전이 바뀌면 모든 기업이 다시 판정된다 |
-| [CompanySignalService](../src/main/java/org/stockinsight/signal/CompanySignalService.java) | 신호 저장 규칙. `applyFinancial(companyId, drafts, ruleVersion)`: 초안을 자연키로 upsert(ACTIVE/PAST), 이번 초안에 없는 기존 신호는 WITHDRAWN. 행은 지우지 않는다(D-36) |
-| [CompanySignalRepository](../src/main/java/org/stockinsight/signal/CompanySignalRepository.java) | package-private. upsert(상태가 바뀔 때만 `status_changed_at` 갱신), withdraw, 조회. `calc_values`·`watch_metrics`는 자체 `JsonMapper`로 JSON 문자열을 만들어 `jsonb`로 캐스팅 |
+| [FinancialSignalCalculator](../src/main/java/org/stockinsight/signal/FinancialSignalCalculator.java) | `calculate(FinancialSummary, asOf)` → `CalculationResult(drafts, staleRecheckAt)`. static 순수 함수. DB·Spring 없음. `assessStale(latest, asOf)`(package-private) → `StaleAssessment(stale, deadline, nextRecheckDate)`: 다음 기간 종료월 말일(`YearMonth...atEndOfMonth()`) + 기한일(60·120일) + 유예 7일로 판정한다(D-43). 이미 미확인이면 `nextRecheckDate=null`(그다음엔 규칙 버전·재무 변경만이 계기) |
+| [FinancialRuleCatalog](../src/main/java/org/stockinsight/signal/FinancialRuleCatalog.java) | 문턱값·심각도 구간 상수와 `RULE_VERSION = "fin-2"`. `QUARTERLY_DEADLINE_DAYS=60`, `ANNUAL_DEADLINE_DAYS=120`, `STALE_GRACE_DAYS=7`은 서비스 내부 데이터 품질 판정 기준이며 실제 법정 제출기한이 아니다(D-43). 값을 바꾸면 버전을 올리고, 버전이 바뀌면 모든 기업이 다시 판정된다 |
+| [CompanySignalService](../src/main/java/org/stockinsight/signal/CompanySignalService.java) | 신호 저장 규칙. `applyFinancial(companyId, drafts, ruleVersion, latestPeriodStateBasisKey)`: 초안을 자연키로 upsert(ACTIVE/PAST). 이번 초안에 없는 기존 신호는 WITHDRAWN이 기본이지만, `FIN_DATA_STALE`이고 그 근거 키가 `latestPeriodStateBasisKey`보다 앞선 기간이면(문자열 비교, `fiscalYearStart:Qn` 형식이라 사전식 비교가 시간순과 같다) PAST로 둔다(해소는 철회가 아니다, D-43). 행은 지우지 않는다(D-36) |
+| [CompanySignalRepository](../src/main/java/org/stockinsight/signal/CompanySignalRepository.java) | package-private. upsert(상태가 바뀔 때만 `status_changed_at` 갱신), withdraw, `markPast`(D-43 해소 전용, 상태가 이미 PAST가 아닐 때만 `status_changed_at` 갱신), 조회. `calc_values`·`watch_metrics`는 자체 `JsonMapper`로 JSON 문자열을 만들어 `jsonb`로 캐스팅 |
 | `SignalDraft` | 계산 결과(저장 전). 대리키 없음 |
 | `CompanySignal` | 조회용 레코드 |
 | `SignalType` | 변화·상태 6종(`FIN_REVENUE_CHANGE`, `FIN_OPERATING_MARGIN_CHANGE`, `FIN_OPERATING_TURN`, `FIN_DEBT_RATIO_JUMP`, `FIN_OPERATING_LOSS_STREAK`, `FIN_CAPITAL_IMPAIRMENT`) + 데이터 한계 7종(`FIN_DATA_*`) |
@@ -279,8 +281,8 @@ Scheduler는 Job의 `run()`(공시는 `runToday()`도)을 부르기만 한다. �
 | 클래스 | 책임 |
 |---|---|
 | [FinancialExplainInputBuilder](../src/main/java/org/stockinsight/analysis/FinancialExplainInputBuilder.java) | `build(companyId)` → `Optional<BuildResult>`(AI 입력 + 값 스냅샷 + 지문). 재무 보고서가 없으면 빈 값. `FinancialSummaryService.summarize()` + `CompanySignalService.findByCompany()`로 최신 손익·연간·재무상태·흐름 사실을 만들고, 활성 신호 전부 + 이력 신호 최대 4개를 심각도·최근성 순으로 골라 기간·주제로 묶는다(ai-analysis.md §4.4.2). 재무상태표가 불일치(`FIN_DATA_INCONSISTENT` 활성)하면 재무상태 지표 전체를 `unavailable`로 두고 `structure` 섹션을 뺀다. 같은 데이터면 바이트 단위로 같은 JSON |
-| [PeriodLabels](../src/main/java/org/stockinsight/analysis/PeriodLabels.java) | package-private. 기간 라벨(12월 결산 "2026년 2분기" / 그 밖 "2026.04~06(1분기)")과 값 표시 형식(비율은 부호 있는 소수 1자리 %, 금액은 KRW만 억·조 축약). **비원화 금액은 축약·구분자 없이 원값+통화코드**([미확인 아님, 확인된 한계] §15) |
-| [Fingerprint](../src/main/java/org/stockinsight/analysis/Fingerprint.java) | package-private. `compute(공시번호 집합, 신호 목록, 제한 코드 집합, 입력 구성 버전)` → SHA-256 해시. 정렬해 이어 붙인 문자열을 해시하므로 값 자체가 아니라 "무엇을 썼는가"가 바뀌어야 지문이 바뀐다(D-08, D-40) |
+| [PeriodLabels](../src/main/java/org/stockinsight/analysis/PeriodLabels.java) | package-private. 기간 라벨(12월 결산 "2026년 2분기" / 그 밖 "2026.04~06(1분기)")과 값 표시 형식(비율은 부호 있는 소수 1자리 %, 개수는 정수). 금액은 통화와 관계없이 한국어 수 단위(조·억·만, 1만 미만은 콤마 정수) + 통화명(KRW=원, CNY=위안, USD=달러, JPY=엔, GBP=파운드, 그 밖은 " "+코드)이고 환산하지 않는다(D-41). 억·조 단위는 반올림 결과가 다음 단위의 경계(10000)에 닿으면 그 단위로 다시 계산해 올린다(예: 9,999.95억 → 1.0조) |
+| [Fingerprint](../src/main/java/org/stockinsight/analysis/Fingerprint.java) | package-private. `compute(공시번호 집합, 신호 목록, unavailable 목록, 입력 구성 버전)` → SHA-256 해시. 정렬해 이어 붙인 문자열을 해시하므로 값 자체가 아니라 "무엇을 썼는가"가 바뀌어야 지문이 바뀐다(D-08, D-40, D-42). 데이터 한계 신호 코드(`FIN_DATA_*`) 자체가 아니라 `unavailable`(지표·사유) 집합을 쓴다 — 날짜로 바뀌는 "최신 재무 미확인" 같은 코드가 바뀌어도 지문은 그대로다 |
 | [FinancialExplainInput](../src/main/java/org/stockinsight/analysis/FinancialExplainInput.java), [ValueSnapshot](../src/main/java/org/stockinsight/analysis/ValueSnapshot.java), [FinancialExplainOutput](../src/main/java/org/stockinsight/analysis/FinancialExplainOutput.java) | AI 입력 계약, 렌더링용 값 스냅샷(원값·출처 공시번호 포함, AI에는 안 감), AI 출력 계약(`overview`/`sales_profit`/`structure`/`history`, 없는 섹션은 null) |
 | [FinancialExplainValidator](../src/main/java/org/stockinsight/analysis/FinancialExplainValidator.java) | `validate(output, input)` → `ValidationResult`(통과 여부 + 실패 규칙 번호 목록). ai-analysis.md §4.4.7 규칙 1~10(스키마·토큰·숫자·반복·강도어·방향 일치·이력 시제·`unavailable`·금지 표현·분량) 전부 코드 상수·정규식으로 판정. DB·Spring 없는 순수 클래스(`new`로 직접 생성, 빈 아님) |
 | [FinancialExplainPrompt](../src/main/java/org/stockinsight/analysis/FinancialExplainPrompt.java) | package-private. `classpath:prompts/`에서 스타일 가이드+역할·규칙 프롬프트, 스키마 JSON을 기동 시 한 번 읽어 상수로 들고 있는다(`PROMPT_VERSION = "fx-v1"`, `SCHEMA_VERSION = "fx-schema-1"`). `userMessage(inputJson, 실패규칙목록)`이 데이터 구분자(`<data>`)로 감싸고, 재시도 때는 실패 규칙 번호만 덧붙인다(AI 출력 원문은 되돌리지 않는다) |
@@ -288,7 +290,7 @@ Scheduler는 Job의 `run()`(공시는 `runToday()`도)을 부르기만 한다. �
 | [FinancialExplainJob](../src/main/java/org/stockinsight/analysis/FinancialExplainJob.java) | 작업명 `analysis-financial-explain`. 대상 = `company.ai_covered` ∪ 골든셋 목록(지금은 `ai_covered`가 전부 false라 골든셋만) 순차 처리. 대상마다 입력 구성 → `AnalysisService.decide()`로 건너뜀/재시도 판단 → LLM 호출 → 검증 → 실패 시 실패 규칙만 프롬프트에 덧붙여 1회 재생성 → 저장. `publish=true`일 때만 검증 통과 결과를 `AnalysisService.publish()`로 승격한다. 예산 초과 시 남은 대상을 건너뛰고 `PARTIAL` |
 | [AnalysisService](../src/main/java/org/stockinsight/analysis/AnalysisService.java) | 저장 규칙(§6.3 상태 전이)만 담당, 생성·검증은 하지 않는다. `decide()`: 같은 지문의 게시·숨김·초안이 있으면 `SKIP_UP_TO_DATE`, REJECTED/FAILED면 24시간 지나야 `PROCEED`(`SKIP_BACKOFF`), 같은 지문 누적 3회 실패 + 프롬프트 버전 그대로면 `SKIP_MAX_FAILURES`. `spentSince(시각)`: 예산 확인용 비용 합(분석 종류 무관) |
 | [AnalysisRepository](../src/main/java/org/stockinsight/analysis/AnalysisRepository.java) | package-private. `insert`, `publish`(기존 게시본 내리고 새 행 올림, 두 update), `findCurrent`, `findLatestByFingerprint`, `countFailuresByFingerprint`, `sumCostSince`. `jsonb` 컬럼은 Jackson 3 `JsonMapper`로 문자열화 |
-| [AnalysisRenderer](../src/main/java/org/stockinsight/analysis/AnalysisRenderer.java) | 화면 조립 전 단계(화면 자체는 없음). `render()`: 토큰 → 값 스냅샷 표시 값, HTML 이스케이프, 모르는 토큰은 예외. `isInvalidated(current, companyId)`: 지금 다시 입력을 만들어 지문이 다르면 무효화. **알려진 과잉 반응**: 새 보고서 도착만으로도 최신 기간이 바뀌어 무효화로 판정된다(§15) |
+| [AnalysisRenderer](../src/main/java/org/stockinsight/analysis/AnalysisRenderer.java) | 화면 조립 전 단계(화면 자체는 없음). `render()`: 토큰 → 값 스냅샷 표시 값, HTML 이스케이프, 모르는 토큰은 예외. `isInvalidated(current, companyId)`(D-42): 입력 전체를 다시 만들지 않는다. 스냅샷이 참조한 신호의 자연키로 `CompanySignalService.findByCompany`(기업당 한 번) 조회 후 상태·방향만 비교(철회되었거나 방향이 바뀌면 무효화)하고, 참조한 사실의 (기간 종료일, 기준) 조합마다 `FinancialService.currentReceiptNo`로 현재 공시번호만 확인(다르거나 없으면 무효화)한다. 새 보고서 도착·활성→이력 전환·심각도/규칙 버전 변경만으로는 무효화하지 않는다. `limitMessages(companyId)`: 스냅샷이 아니라 현재 활성 `FIN_DATA_*` 신호로 매번 새로 만든다(헤더는 렌더링 시점 현재 값, D-42) |
 | [StaticContent](../src/main/java/org/stockinsight/analysis/StaticContent.java) | package-private. 신호 유형·방향별 배지 이름, 제한 코드별 문구, AI 생성 표시·무효화 안내 문구. 전부 코드 상수(AI가 만들지 않음) |
 | [GoldenSetDumpRunner](../src/main/java/org/stockinsight/analysis/GoldenSetDumpRunner.java) | `@Profile("goldenset")`인 `ApplicationRunner`. AI를 호출하지 않는다. 골든셋 목록의 §4.4.2 입력 JSON을 로컬 DB에서 만들어 `src/test/resources/golden/financial_explain/{companyId}.json`에 쓴다. **구현하지 않은 것**: 저장된 입력 파일을 다시 읽어 재생성하는 경로(implementation-plan.md §7.2의 7번) |
 | `AnalysisKind`, `AnalysisStatus`, `TargetType` | `FINANCIAL_EXPLAIN`(하나뿐) / `DRAFT`·`PUBLISHED`·`REJECTED`·`FAILED`·`HIDDEN` / `COMPANY`(하나뿐) |
@@ -345,7 +347,7 @@ FinancialExplainJob ──▶ FinancialExplainInputBuilder.build() ──▶ Fin
 1. **설정 읽기.** `application.yml` → `application-{profile}.yml`. `local`이면 `spring.config.import: optional:file:${STOCKINSIGHT_SECRETS:${user.home}/.stockinsight/secrets.yml}`로 저장소 밖 비밀값 파일을 읽는다(없어도 기동). `prod`는 `optional`이 없어 파일이 없으면 기동에 실패한다. 같은 이름의 환경 변수는 파일보다 우선한다(README). `app.dart.api-key: ${DART_API_KEY:}`가 이 값을 받는다.
 2. **`@ConfigurationProperties` 바인딩.** `@ConfigurationPropertiesScan`이 `org.stockinsight` 아래 레코드 7개를 등록한다: `DartProperties`(`app.dart`), `CompanySyncProperties`, `DisclosureSyncProperties`, `FinancialSyncProperties`(`app.ingest.*`), `FinancialSignalProperties`(`app.signal.financial-signal`), `FinancialExplainProperties`(`app.analysis.financial-explain`), `LlmProperties`(`app.llm`). `Duration`(`200ms`, `30d`)과 `Period`(`3y`) 변환은 Spring Boot가 한다.
 3. **DataSource.** `spring.datasource.*` (local: compose DB, prod: `DB_URL` 등 환경 변수, test: `@ServiceConnection` 컨테이너).
-4. **Flyway.** `classpath:db/migration`의 V1~V5를 적용한다(V5 = `analysis` 테이블). 스키마는 Flyway만 관리한다.
+4. **Flyway.** `classpath:db/migration`의 V1~V6를 적용한다(V5 = `analysis` 테이블, V6 = `ingest_checkpoint.next_check_at`). 스키마는 Flyway만 관리한다.
 5. **JPA/Hibernate.** `ddl-auto: validate` — `Company`, `Security`, `CompanyAlias` 매핑이 Flyway가 만든 스키마와 맞지 않으면 기동에 실패한다. `hibernate.jdbc.time_zone: UTC`, `open-in-view: false`. 컬럼명은 Spring Boot 기본 명명 전략(camelCase → snake_case)으로 매핑된다(엔티티에 `@Column`이 없다).
 6. **Bean 생성.** §5.3 표.
 7. **스케줄링.** `app.scheduler.enabled`가 true일 때만 `SchedulingConfig`가 로드되어 `@EnableScheduling`이 켜진다. Scheduler 빈 자체는 항상 만들어지지만, 꺼져 있으면 `@Scheduled`가 처리되지 않아 cron이 등록되지 않는다. 기본값 false, `prod`는 true.
@@ -550,8 +552,9 @@ FinancialSignalScheduler.scheduled()  07:00
 └─ FinancialSignalJob.run()                            :61
    └─ sync()                                           :83
       ├─ financialService.lastChangedByCompanyId()      기업별 max(financial_report.updated_at). 비어 있으면 IllegalStateException
-      ├─ 대상 = 체크포인트 없음 | ERROR | 원천 버전("fin-1:<마지막 변경 시각>")이 다름
-      │    → 재무가 바뀌었거나 규칙 버전이 바뀐 기업만
+      ├─ checkpoints.findAllBySource(SIGNAL_FINANCIAL)   기업별 체크포인트 한 번에 로드(nextCheckAt 포함)
+      ├─ 대상 = (체크포인트 없음 | ERROR | 원천 버전("fin-2:<마지막 변경 시각>")이 다름)
+      │         OR (체크포인트.nextCheckAt이 있고 오늘 ≥ nextCheckAt)   ← D-43, 추가 조회 없음
       ├─ fullRecompute = 대상 > 전체의 50%  (철회 급증 경고를 끄는 기준)
       └─ for companyId in 대상
          └─ transaction {
@@ -564,7 +567,7 @@ FinancialSignalScheduler.scheduled()  07:00
                 ├─ buildAnnual(): FY 보고서 최근 3개 → AnnualEntry (12개월이 아니면 irregular)
                 ├─ detectBasisGap(): 창 안에 다른 기준에만 있는 기간 → BASIS_GAP
                 └─ buildFlags(): NON_KRW, NOT_APPLICABLE_FORMAT, BASIS_GAP, INCONSISTENT_BALANCE, DERIVED_INVALID
-              drafts = FinancialSignalCalculator.calculate(summary, today)            :35
+              (drafts, staleRecheckAt) = FinancialSignalCalculator.calculate(summary, today)  :35
                 ├─ 흐름 기간 = 파생이 아닌 분기 + 연간
                 │    각 기간: 흑자·적자 전환(turnSignal) → 없으면 영업이익률 변화 → 매출 증감
                 │    active = 그 기간 종료일 == 최신 기간 종료일
@@ -572,14 +575,20 @@ FinancialSignalScheduler.scheduled()  07:00
                 ├─ 영업적자 지속: 이어진(45~135일 간격) 적자 분기 4개 이상 구간마다
                 ├─ 자본잠식: 자본총계 < 자본금인 이어진 구간마다
                 └─ 데이터 한계 7종 (항상 active, 방향 UNCERTAIN, 심각도 LOW)
-              result = CompanySignalService.applyFinancial(companyId, drafts, "fin-1")  :28
+                     └─ FIN_DATA_STALE: assessStale(latest, today) → (stale?, deadline, nextRecheckDate)
+                          다음 기간 종료월 말일 + 60/120일(3분기 latest면 120) + 유예 7일. D-43
+              latestKey = summary.quarters()[0].key().stateBasisKey() (재무 없으면 null)
+              result = CompanySignalService.applyFinancial(companyId, drafts, "fin-2", latestKey)  :33
                 ├─ 기존 비철회 자연키 집합
                 ├─ 초안마다 CompanySignalRepository.upsert(status = active ? ACTIVE : PAST)
-                └─ 초안에 없던 기존 자연키 → withdraw() (WITHDRAWN)
-              checkpoints.record(SIGNAL_FINANCIAL, companyId, 원천 버전, SUCCESS, "반영 n·철회 m")
+                └─ 초안에 없던 기존 자연키
+                     ├─ FIN_DATA_STALE이고 근거 키 < latestKey → markPast() (PAST, 해소는 철회가 아니다)
+                     └─ 그 외 → withdraw() (WITHDRAWN)
+              checkpoints.record(SIGNAL_FINANCIAL, companyId, 원천 버전, SUCCESS, "반영 n·철회 m", staleRecheckAt)
             }
             catch RuntimeException → record(ERROR) (트랜잭션 밖), failed++
       ├─ 규칙 전체 재판정이 아닌데 철회 발생 기업 > 대상의 10% → 경고 로그 + 요약에 "[경고: 철회 급증]"
+      │    (STALE이 markPast로 처리된 것은 withdrawn 카운트에 들어가지 않는다)
       └─ 실패가 있으면 PARTIAL, 없으면 SUCCEEDED
 ```
 
@@ -759,7 +768,7 @@ FinancialSummaryService.summarize() + CompanySignalService.findByCompany()
             │ FinancialExplainInputBuilder.build()
             │   FactCollector: 사실 키·표시 값 생성, 재무상태표 불일치면 재무상태 전체를 unavailable로
             │   selectSignals(): 활성 전부 + 이력 최대 4개, 데이터 한계 신호 제외
-            │   Fingerprint.compute(): 공시번호 집합 + 신호 튜플 + 제한 코드 + 입력 구성 버전 → SHA-256
+            │   Fingerprint.compute(): 공시번호 집합 + 신호 튜플 + unavailable 집합 + 입력 구성 버전 → SHA-256
             ▼
           BuildResult { FinancialExplainInput(AI로 감), ValueSnapshot(렌더링용, 안 감), fingerprint }
             │ FinancialExplainPrompt.userMessage(JSON, 이전 실패 규칙)  ──JsonMapper(Jackson 3)──▶ 문자열
@@ -778,6 +787,7 @@ FinancialSummaryService.summarize() + CompanySignalService.findByCompany()
             ▼
           analysis 행 (DRAFT, publish=true면 PUBLISHED로 승격)
 읽기: AnalysisRenderer.render() ──▶ 토큰을 ValueSnapshot 표시 값으로 치환 (화면 코드는 아직 없음)
+읽기: AnalysisRenderer.isInvalidated(current, companyId) ──▶ CompanySignalService.findByCompany + FinancialService.currentReceiptNo만 조회(D-42, 입력 재구성 없음)
 ```
 
 ### 9.6 변환 원칙 (코드에서 관찰되는 것)
@@ -797,12 +807,12 @@ FinancialSummaryService.summarize() + CompanySignalService.findByCompany()
 | `company` | V1 | `CompanyService`(JPA) | `CompanyService` 조회 → 모든 수집 Job | 고유번호 unique. 상태 ACTIVE/EXCLUDED/DELISTED. `ai_covered`는 기본 false이고 바꾸는 코드 없음 |
 | `security` | V1 | `CompanyService` | `CompanyService.commonSecurityOf` (테스트) | (company_id, share_type) unique |
 | `company_alias` | V1 | `CompanyService` (사명 변경) | `CompanyService.aliasesOf` | (company_id, alias) unique |
-| `ingest_checkpoint` | V1 | `IngestCheckpointRepository.record` (4개 Job) | `findAllBySource` (4개 Job) | PK (source, target_key) |
+| `ingest_checkpoint` | V1, `next_check_at` 컬럼은 V6 | `IngestCheckpointRepository.record` (4개 Job) | `findAllBySource` (4개 Job) | PK (source, target_key). `next_check_at`은 `SIGNAL_FINANCIAL`만 쓴다(D-43) |
 | `pipeline_run` | V1 | `PipelineRunRecorder` | 코드에서 읽지 않음 (운영자가 SQL로 확인) | 작업명·시작 시각 인덱스 |
 | `disclosure` | V2 | `DisclosureRepository.upsert`, `relinkAmendments` | `latestPeriodicByCompanyAndBaseName` (재무 수집), `findByReceiptNo` | 공시번호 unique, `original_id` 자기 참조 |
-| `financial_report` | V3 | `FinancialRepository` (via `FinancialService.replace`) | `FinancialSummaryService`, `lastChangedByCompanyId` | (company_id, bsns_year, report_code, fs_div) unique |
+| `financial_report` | V3 | `FinancialRepository` (via `FinancialService.replace`) | `FinancialSummaryService`, `lastChangedByCompanyId`, `currentReceiptNo`(`AnalysisRenderer.isInvalidated`) | (company_id, bsns_year, report_code, fs_div) unique |
 | `financial_line` | V3 | 같음 | 같음 | (report_id, ord) unique, 보고서 삭제 시 cascade |
-| `company_signal` | V4 | `CompanySignalRepository` | `CompanySignalService.findByCompany` (테스트, `FinancialExplainInputBuilder`) | (company_id, signal_type, basis_key) unique. 행을 지우지 않음 |
+| `company_signal` | V4 | `CompanySignalRepository`(`upsert`/`withdraw`/`markPast`) | `CompanySignalService.findByCompany` (`FinancialExplainInputBuilder`, `AnalysisRenderer.isInvalidated`/`limitMessages`, 테스트) | (company_id, signal_type, basis_key) unique. 행을 지우지 않음 |
 | `analysis` | V5 | `AnalysisRepository`(`FinancialExplainJob`이 부름) | `AnalysisRepository.findCurrent`/`findLatestByFingerprint`/`sumCostSince` (`AnalysisService`, `AnalysisRenderer`) | (target_type, target_key, analysis_kind) 부분 유일 인덱스(`is_current`일 때만), (target_type, target_key, analysis_kind, fingerprint) 일반 인덱스. `model` 컬럼은 null 허용(호출 자체가 실패해 응답을 못 받은 FAILED 행은 모델을 모른다) |
 
 architecture.md §4.2의 나머지 테이블(`price_daily`, `market_holiday`, `document_section`, `news_item`, `competitor`, `corporate_event`, `content_entry`)은 아직 없다 [설계만].
@@ -950,9 +960,9 @@ architecture.md §4.2의 나머지 테이블(`price_daily`, `market_holiday`, `d
 
 | 종류 | 파일 | 방식 |
 |---|---|---|
-| 통합(Job 전체) | `CompanySyncJobTest`, `DisclosureSyncJobTest`, `DisclosureSyncCallLimitTest`, `FinancialSyncJobTest`, `FinancialSyncCallLimitTest`, `FinancialSignalJobTest`, `FinancialExplainJobTest`, `AnalysisRendererTest` | `@SpringBootTest` + `@Import(TestcontainersConfiguration, Fake*Config)`. 테스트 안의 `FakeDartConfig`/`FakeLlmConfig`가 `FakeDartApi`·`FakeLlmClient`·`MutableClock`을 `@Primary` 빈으로 등록해 `DartApi`·`LlmClient`·`Clock` 주입을 대체한다. `@SpringBootTest(properties = ...)`로 호출 상한·`publish` 등을 줄인다. 테스트마다 `truncate ... restart identity cascade` |
+| 통합(Job 전체) | `CompanySyncJobTest`, `DisclosureSyncJobTest`, `DisclosureSyncCallLimitTest`, `FinancialSyncJobTest`, `FinancialSyncCallLimitTest`, `FinancialSignalJobTest`, `FinancialSignalStaleJobTest`, `FinancialExplainJobTest`, `AnalysisRendererTest` | `@SpringBootTest` + `@Import(TestcontainersConfiguration, Fake*Config)`. 테스트 안의 `FakeDartConfig`/`FakeLlmConfig`/`FixedClockConfig`가 `FakeDartApi`·`FakeLlmClient`·`MutableClock`을 `@Primary` 빈으로 등록해 `DartApi`·`LlmClient`·`Clock` 주입을 대체한다. `@SpringBootTest(properties = ...)`로 호출 상한·`publish` 등을 줄인다. 테스트마다 `truncate ... restart identity cascade`(공유되는 `MutableClock` 싱글턴은 `truncate`로 리셋되지 않으므로, 남은 값에 좌우되지 않도록 `@BeforeEach`에서 먼저 명시적으로 날짜를 맞춘다, `FinancialSignalStaleJobTest`) |
 | 클라이언트 | `DartClientTest` | `src/test/resources/dart/`의 실제 응답 샘플 (세부 방식은 이 문서에서 추적하지 않음) |
-| 단위 | `ListingScopePolicyTest`, `ReportNameTest`, `PeriodicReportNameTest`, `FinancialServiceTest`, `FinancialSummaryServiceTest`, `FinancialSignalCalculatorTest`, `FinancialExplainValidatorTest` | 파일명 기준 분류. 각 파일이 Spring 컨텍스트를 쓰는지는 이 문서에서 확인하지 않음. `FinancialExplainValidatorTest`는 Spring 없이 `new FinancialExplainValidator()`로 직접 검증기를 만들어 §4.4.7 규칙 1~10의 경계값 27건을 확인한다 |
+| 단위 | `ListingScopePolicyTest`, `ReportNameTest`, `PeriodicReportNameTest`, `FinancialServiceTest`, `FinancialSummaryServiceTest`, `FinancialSignalCalculatorTest`, `FinancialExplainValidatorTest`, `PeriodLabelsTest` | 파일명 기준 분류. 각 파일이 Spring 컨텍스트를 쓰는지는 이 문서에서 확인하지 않음. `FinancialExplainValidatorTest`는 Spring 없이 `new FinancialExplainValidator()`로 직접 검증기를 만들어 §4.4.7 규칙 1~10의 경계값 27건을 확인한다. `FinancialSignalCalculatorTest`는 `assessStale`의 12·3·6월 결산 기한 경계도 확인한다(D-43) |
 | 입력 구성(통합) | `FinancialExplainInputBuilderTest` | `@SpringBootTest` + Testcontainers. 사실표·섹션·`unavailable`·지문(정정 시 변경 포함)·결정적 입력(같은 데이터 → 같은 JSON)을 실제 신호 계산(`FinancialSignalJob`)까지 거쳐 확인 |
 | 컨텍스트 | `StockInsightApplicationTests` | 기동 확인 |
 
@@ -986,9 +996,9 @@ architecture.md §4.2의 나머지 테이블(`price_daily`, `market_holiday`, `d
 **AI 분석의 알려진 한계** (2026-09-25, 3-4 세션에서 실제 데이터로 확인. 판단 대기 항목은 implementation-plan.md §3)
 
 - ~~`AccountMapper`가 "영업수익"을 인식하지 못한다~~ → 오진이다(implementation-plan.md §8.1). 주요계정 API에는 "영업수익" 계정명이 없다. 금융형 증권·투자사는 "매출액"으로 와서 이미 "영업수익" 원값 경로(증가율 없음)를 탄다(골든셋 SV인베스트먼트). 은행·보험(DB손해보험 등)은 매출 계정 자체가 없다(`ACCOUNT_MISSING`).
-- 비원화(CNY·USD·JPY·GBP, 실제 로컬 DB에 193벌) 금액은 억·조 단위 축약이나 천 단위 구분자 없이 "1366952305CNY"처럼 표시된다. KRW도 1억 미만이면 원값이다. `revenue_yoy`를 주지 않는 기업에도 `revenue_yoy_run`이 들어간다. D-41로 수정이 결정되었고 아직 구현하지 않았다 [설계만].
-- `AnalysisRenderer.isInvalidated()`가 지문 전체 재계산-비교 방식이라, 새 보고서·규칙 버전 변경·"최신 재무 미확인" 변화만으로도 무효화로 판정한다. 화면마다 입력 전체를 다시 만든다. D-42로 수정이 결정되었고 아직 구현하지 않았다 [설계만].
-- `FIN_DATA_STALE`(`signal` 패키지)은 첫 전체 실행 뒤 새로 기한이 지나는 기업을 다시 판정하지 않는다(재무가 바뀐 기업만 대상). 기한은 45·90일이고 3분기 다음 종료일을 12/30으로 계산한다. 해소되면 철회가 된다. D-43으로 수정이 결정되었고 아직 구현하지 않았다 [설계만].
+- ~~비원화 금액이 축약·구분자 없이 원값+통화코드로 표시된다~~ → D-41로 수정 완료(2026-09-26). 통화 무관 한국어 수 단위(조·억·만) + 통화명, 환산 없음. `revenue_yoy_run`도 최신 기간 `revenue_yoy`를 줄 수 있을 때만 준다. `PeriodLabelsTest`(13건) + 실데이터 12개사 재덤프로 확인(implementation-plan.md §8.7).
+- ~~`AnalysisRenderer.isInvalidated()`가 지문 전체 재계산-비교 방식이라 과잉 무효화한다~~ → D-42로 수정 완료(2026-09-26). 스냅샷이 참조한 신호 자연키·사실의 (기간 종료일, 기준)만 조회해 판정하고, 입력 전체를 다시 만들지 않는다. `AnalysisRendererTest`(4건)로 확인.
+- ~~`FIN_DATA_STALE`이 첫 전체 실행 뒤 새로 기한이 지나는 기업을 다시 판정하지 않는다~~ → D-43으로 수정 완료(2026-09-26). 기한 60·120일(다음 기간 종료월 말일 기준) + 유예 7일, 판정이 남긴 재판정일(`ingest_checkpoint.next_check_at`)이 지난 기업만 추가로 다시 판정, 해소는 이력(PAST). `FinancialSignalCalculatorTest`(6건)·`FinancialSignalStaleJobTest`(4건) + 실데이터(로컬 DB 전체 재판정, 규칙 버전 `fin-2` 반영 확인)로 확인.
 - `FinancialExplainJob`은 순차 처리다. ai-analysis.md §6.2의 동시 호출 수 설정은 구현하지 않았다.
 - 골든셋 입력 파일(`src/test/resources/golden/financial_explain/`)을 다시 읽어 재생성하는 경로가 없다. 지금은 `GoldenSetDumpRunner`(입력 JSON만 파일로 저장, AI 호출 없음)만 있다.
 - `company.ai_covered`를 채우는 코드가 없다(D-23 미구현, §3). `FinancialExplainJob`의 대상은 지금 전부 `golden-set-company-ids`에서 온다.

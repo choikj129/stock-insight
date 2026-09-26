@@ -94,7 +94,7 @@
   }, {
     "key" : "fin.operating_income.2025-01.Q4",
     "name" : "영업이익",
-    "display" : "-39810418원",
+    "display" : "-3,981만원",
     "sign" : "-",
     "period" : "2025-01.Q4"
   }, {
@@ -112,13 +112,13 @@
   }, {
     "key" : "fin.total_assets.2026-01.Q2",
     "name" : "자산총계",
-    "display" : "3378.9억원",
+    "display" : "3,378.9억원",
     "sign" : "+",
     "period" : "2026-01.Q2"
   }, {
     "key" : "fin.total_liabilities.2026-01.Q2",
     "name" : "부채총계",
-    "display" : "2390.4억원",
+    "display" : "2,390.4억원",
     "sign" : "+",
     "period" : "2026-01.Q2"
   }, {
@@ -153,7 +153,7 @@
     "period" : "2026-01.Q2"
   }, {
     "key" : "fin.revenue_yoy_run.2026-01.Q2",
-    "name" : "매출 증가율 같은 방향 지속 분기 수",
+    "name" : "매출 같은 방향 연속 분기 수",
     "display" : "2분기",
     "sign" : "-",
     "period" : "2026-01.Q2"

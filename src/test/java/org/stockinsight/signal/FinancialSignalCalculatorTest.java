@@ -239,6 +239,84 @@ class FinancialSignalCalculatorTest {
         assertThat(signals.get(0).persistence()).isEqualTo(4);
     }
 
+    // ---- FIN_DATA_STALE 기한 (D-43) ----
+
+    @Test
+    void staleDeadlineForQ1UsesNextHalfYearEndPlusSixtyDaysAndSevenDayGrace() {
+        // 최신 1분기(3/31) → 다음 반기 종료 6/30, 기한 8/29, 9/5 아님·9/6 STALE
+        QuarterEntry q1 = quarter(1, MetricValue.EMPTY, MetricValue.EMPTY, FinancialFormat.GENERAL, true);
+
+        FinancialSignalCalculator.StaleAssessment before = FinancialSignalCalculator.assessStale(q1, LocalDate.of(2026, 9, 5));
+        FinancialSignalCalculator.StaleAssessment after = FinancialSignalCalculator.assessStale(q1, LocalDate.of(2026, 9, 6));
+
+        assertThat(before.deadline()).isEqualTo(LocalDate.of(2026, 8, 29));
+        assertThat(before.stale()).isFalse();
+        assertThat(before.nextRecheckDate()).isEqualTo(LocalDate.of(2026, 9, 6));
+        assertThat(after.stale()).isTrue();
+        assertThat(after.nextRecheckDate()).isNull();
+    }
+
+    @Test
+    void staleDeadlineForH1UsesNextQuarterEndPlusSixtyDays() {
+        // 최신 반기(6/30) → 다음 3분기 종료 9/30, 기한 11/29, 12/6 아님·12/7 STALE
+        QuarterEntry h1 = quarter(2, MetricValue.EMPTY, MetricValue.EMPTY, FinancialFormat.GENERAL, true);
+
+        assertThat(FinancialSignalCalculator.assessStale(h1, LocalDate.of(2026, 12, 6)).stale()).isFalse();
+        assertThat(FinancialSignalCalculator.assessStale(h1, LocalDate.of(2026, 12, 7)).stale()).isTrue();
+        assertThat(FinancialSignalCalculator.assessStale(h1, LocalDate.EPOCH).deadline()).isEqualTo(LocalDate.of(2026, 11, 29));
+    }
+
+    @Test
+    void staleDeadlineForQ3UsesAnnualDeadlineAndMonthEndNotRawPlusThreeMonths() {
+        // 최신 3분기(9/30) → 다음 사업연도 종료 12/31(12/30 아님), 기한 4/30(윤년 아님), 5/7 아님·5/8 STALE
+        QuarterEntry q3 = quarter(3, MetricValue.EMPTY, MetricValue.EMPTY, FinancialFormat.GENERAL, true);
+
+        FinancialSignalCalculator.StaleAssessment result = FinancialSignalCalculator.assessStale(q3, LocalDate.EPOCH);
+
+        assertThat(result.deadline()).isEqualTo(LocalDate.of(2027, 4, 30));
+        assertThat(FinancialSignalCalculator.assessStale(q3, LocalDate.of(2027, 5, 7)).stale()).isFalse();
+        assertThat(FinancialSignalCalculator.assessStale(q3, LocalDate.of(2027, 5, 8)).stale()).isTrue();
+    }
+
+    @Test
+    void staleDeadlineForAnnualUsesQuarterlyDeadlineForNextQ1() {
+        // 최신 사업(12/31, 파생 4분기) → 다음 1분기 종료 3/31, 기한 5/30, 6/6 아님·6/7 STALE
+        QuarterEntry annual = quarter(4, MetricValue.EMPTY, MetricValue.EMPTY, FinancialFormat.GENERAL, true);
+
+        FinancialSignalCalculator.StaleAssessment result = FinancialSignalCalculator.assessStale(annual, LocalDate.EPOCH);
+
+        assertThat(result.deadline()).isEqualTo(LocalDate.of(2027, 5, 30));
+        assertThat(FinancialSignalCalculator.assessStale(annual, LocalDate.of(2027, 6, 6)).stale()).isFalse();
+        assertThat(FinancialSignalCalculator.assessStale(annual, LocalDate.of(2027, 6, 7)).stale()).isTrue();
+    }
+
+    @Test
+    void staleDeadlineSnapsToMonthEndEvenForNonMonthEndFiscalYear() {
+        // 2월 말 결산(2/28) → 다음 종료월 말일(5/31, 5/28 아님). 윤년이면 2/29도 같은 규칙.
+        QuarterEntry febEnd = new QuarterEntry(new PeriodKey(LocalDate.of(2025, 12, 1), 1), PeriodType.Q1,
+                LocalDate.of(2026, 2, 28), "R1", false, true, FinancialFormat.GENERAL, true,
+                MetricValue.EMPTY, MetricValue.EMPTY, MetricValue.EMPTY, MetricValue.EMPTY, MetricValue.EMPTY,
+                MetricValue.EMPTY, MetricValue.EMPTY);
+        QuarterEntry leapFebEnd = new QuarterEntry(new PeriodKey(LocalDate.of(2023, 12, 1), 1), PeriodType.Q1,
+                LocalDate.of(2024, 2, 29), "R1", false, true, FinancialFormat.GENERAL, true,
+                MetricValue.EMPTY, MetricValue.EMPTY, MetricValue.EMPTY, MetricValue.EMPTY, MetricValue.EMPTY,
+                MetricValue.EMPTY, MetricValue.EMPTY);
+
+        assertThat(FinancialSignalCalculator.assessStale(febEnd, LocalDate.EPOCH).deadline())
+                .isEqualTo(LocalDate.of(2026, 5, 31).plusDays(FinancialRuleCatalog.QUARTERLY_DEADLINE_DAYS));
+        assertThat(FinancialSignalCalculator.assessStale(leapFebEnd, LocalDate.EPOCH).deadline())
+                .isEqualTo(LocalDate.of(2024, 5, 31).plusDays(FinancialRuleCatalog.QUARTERLY_DEADLINE_DAYS));
+    }
+
+    @Test
+    void staleDeadlineIgnoresWeekends() {
+        // 기한일이 토요일이어도(달력일로만 센다) 결과가 같다.
+        QuarterEntry q1 = quarter(1, MetricValue.EMPTY, MetricValue.EMPTY, FinancialFormat.GENERAL, true);
+        LocalDate deadline = FinancialSignalCalculator.assessStale(q1, LocalDate.EPOCH).deadline();
+        // 2026-08-29는 토요일이다.
+        assertThat(deadline.getDayOfWeek().getValue()).isEqualTo(6);
+    }
+
     private static List<QuarterEntry> reversed(List<QuarterEntry> ascending) {
         List<QuarterEntry> copy = new java.util.ArrayList<>(ascending);
         java.util.Collections.reverse(copy);
@@ -248,7 +326,7 @@ class FinancialSignalCalculatorTest {
     // ---- 헬퍼 ----
 
     private static List<SignalDraft> signalsOf(FinancialSummary summary, SignalType type) {
-        return FinancialSignalCalculator.calculate(summary, ASOF).stream()
+        return FinancialSignalCalculator.calculate(summary, ASOF).drafts().stream()
                 .filter(d -> d.type() == type)
                 .toList();
     }

@@ -12,7 +12,7 @@ import org.stockinsight.financial.FinancialRatios;
 public final class FinancialRuleCatalog {
 
     /** 규칙 버전. 바뀌면 모든 기업을 다시 판정한다. {@code analysis} 패키지가 입력 신호의 규칙 버전으로 참조한다. */
-    public static final String RULE_VERSION = "fin-1";
+    public static final String RULE_VERSION = "fin-2";
 
     /** 매출 비교 기준값: 분기 10억, 연간 40억 (미만이면 증가율을 계산하지 않는다). */
     static final BigDecimal REVENUE_BASE_QUARTER = FinancialRatios.REVENUE_BASE_QUARTER;
@@ -53,9 +53,13 @@ public final class FinancialRuleCatalog {
     /** 데이터 이력이 이 분기 수 미만이면 "재무 이력 부족". */
     static final int MIN_HISTORY_QUARTERS = 4;
 
-    /** 다음 보고서 제출 기한: 분기·반기 45일, 사업보고서 90일. 이 값에 +7일을 더해 "미확인" 기준으로 쓴다. */
-    static final int QUARTERLY_DEADLINE_DAYS = 45;
-    static final int ANNUAL_DEADLINE_DAYS = 90;
+    /**
+     * "최신 재무 미확인"(FIN_DATA_STALE) 판정 기한(D-43). 다음 기간 종료월의 말일에서 센다(달력일). 상장사에
+     * 적용되는 가장 긴 법정 기한을 모든 기업에 쓴다. 서비스 내부 데이터 품질 판정 기준이며 실제 법정 제출기한
+     * 자체가 아니다(60일·120일은 여유를 둔 근사치, 유예 7일은 휴일 순연과 수집 시차 흡수용).
+     */
+    static final int QUARTERLY_DEADLINE_DAYS = 60;
+    static final int ANNUAL_DEADLINE_DAYS = 120;
     static final int STALE_GRACE_DAYS = 7;
 
     private FinancialRuleCatalog() {

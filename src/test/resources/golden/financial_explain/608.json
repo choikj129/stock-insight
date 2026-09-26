@@ -11,7 +11,7 @@
     "kind" : "QUARTER"
   },
   "changeStatus" : "NONE",
-  "sections" : [ "overview", "sales_profit", "structure", "history" ],
+  "sections" : [ "overview", "sales_profit", "structure" ],
   "periods" : [ {
     "key" : "2025-07.Q3",
     "label" : "2026.01~03(3분기)"
@@ -22,25 +22,25 @@
   "facts" : [ {
     "key" : "fin.revenue.2025-07.Q3",
     "name" : "매출액",
-    "display" : "1366952305CNY",
+    "display" : "13.7억위안",
     "sign" : "+",
     "period" : "2025-07.Q3"
   }, {
     "key" : "fin.revenue_prior.2025-07.Q3",
     "name" : "매출액(전년 동기)",
-    "display" : "1070464168CNY",
+    "display" : "10.7억위안",
     "sign" : "+",
     "period" : "2025-07.Q3"
   }, {
     "key" : "fin.operating_income.2025-07.Q3",
     "name" : "영업이익",
-    "display" : "205331064CNY",
+    "display" : "2.1억위안",
     "sign" : "+",
     "period" : "2025-07.Q3"
   }, {
     "key" : "fin.operating_income_prior.2025-07.Q3",
     "name" : "영업이익(전년 동기)",
-    "display" : "144732140CNY",
+    "display" : "1.4억위안",
     "sign" : "+",
     "period" : "2025-07.Q3"
   }, {
@@ -64,25 +64,25 @@
   }, {
     "key" : "fin.net_income.2025-07.Q3",
     "name" : "당기순이익",
-    "display" : "139545684CNY",
+    "display" : "1.4억위안",
     "sign" : "+",
     "period" : "2025-07.Q3"
   }, {
     "key" : "fin.net_income_prior.2025-07.Q3",
     "name" : "당기순이익(전년 동기)",
-    "display" : "117646504CNY",
+    "display" : "1.2억위안",
     "sign" : "+",
     "period" : "2025-07.Q3"
   }, {
     "key" : "fin.revenue.2024-07.Q4",
     "name" : "매출액",
-    "display" : "4943342767CNY",
+    "display" : "49.4억위안",
     "sign" : "+",
     "period" : "2024-07.Q4"
   }, {
     "key" : "fin.operating_income.2024-07.Q4",
     "name" : "영업이익",
-    "display" : "707629590CNY",
+    "display" : "7.1억위안",
     "sign" : "+",
     "period" : "2024-07.Q4"
   }, {
@@ -94,31 +94,31 @@
   }, {
     "key" : "fin.net_income.2024-07.Q4",
     "name" : "당기순이익",
-    "display" : "495934973CNY",
+    "display" : "5.0억위안",
     "sign" : "+",
     "period" : "2024-07.Q4"
   }, {
     "key" : "fin.total_assets.2025-07.Q3",
     "name" : "자산총계",
-    "display" : "12499271263CNY",
+    "display" : "125.0억위안",
     "sign" : "+",
     "period" : "2025-07.Q3"
   }, {
     "key" : "fin.total_liabilities.2025-07.Q3",
     "name" : "부채총계",
-    "display" : "5687682950CNY",
+    "display" : "56.9억위안",
     "sign" : "+",
     "period" : "2025-07.Q3"
   }, {
     "key" : "fin.total_equity.2025-07.Q3",
     "name" : "자본총계",
-    "display" : "6811588313CNY",
+    "display" : "68.1억위안",
     "sign" : "+",
     "period" : "2025-07.Q3"
   }, {
     "key" : "fin.capital_stock.2025-07.Q3",
     "name" : "자본금",
-    "display" : "1094539928CNY",
+    "display" : "10.9억위안",
     "sign" : "+",
     "period" : "2025-07.Q3"
   }, {
@@ -137,12 +137,6 @@
     "key" : "fin.debt_ratio_diff.2025-07.Q3",
     "name" : "부채비율 변화",
     "display" : "+6.9%p",
-    "sign" : "+",
-    "period" : "2025-07.Q3"
-  }, {
-    "key" : "fin.revenue_yoy_run.2025-07.Q3",
-    "name" : "매출 증가율 같은 방향 지속 분기 수",
-    "display" : "3분기",
     "sign" : "+",
     "period" : "2025-07.Q3"
   } ],

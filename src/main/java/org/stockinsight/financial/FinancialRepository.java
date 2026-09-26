@@ -37,6 +37,22 @@ class FinancialRepository {
                 .list());
     }
 
+    /**
+     * 기간 말·기준으로 현재 보고서의 공시번호만 찾는다(계정 행을 읽지 않는다). 무효화 판정(D-42)이
+     * 재무 요약 전체를 다시 만들지 않고 참조한 보고서 하나의 현재 상태만 확인할 때 쓴다.
+     */
+    Optional<String> findReceiptNoByPeriodEnd(long companyId, LocalDate periodEnd, String fsDiv) {
+        return jdbc.sql("""
+                        select receipt_no from financial_report
+                         where company_id = :companyId and period_end = :periodEnd and fs_div = :fsDiv
+                        """)
+                .param("companyId", companyId)
+                .param("periodEnd", periodEnd)
+                .param("fsDiv", fsDiv)
+                .query(String.class)
+                .optional();
+    }
+
     Optional<ExistingReport> find(long companyId, int bsnsYear, String reportCode, String fsDiv) {
         return jdbc.sql("""
                         select id, fiscal_year_start, period_end, currency, receipt_no

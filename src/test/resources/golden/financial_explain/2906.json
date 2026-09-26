@@ -79,19 +79,19 @@
   }, {
     "key" : "fin.total_assets.2026-01.Q2",
     "name" : "자산총계",
-    "display" : "3937.0억원",
+    "display" : "3,937.0억원",
     "sign" : "+",
     "period" : "2026-01.Q2"
   }, {
     "key" : "fin.total_liabilities.2026-01.Q2",
     "name" : "부채총계",
-    "display" : "1908.6억원",
+    "display" : "1,908.6억원",
     "sign" : "+",
     "period" : "2026-01.Q2"
   }, {
     "key" : "fin.total_equity.2026-01.Q2",
     "name" : "자본총계",
-    "display" : "2028.4억원",
+    "display" : "2,028.4억원",
     "sign" : "+",
     "period" : "2026-01.Q2"
   }, {

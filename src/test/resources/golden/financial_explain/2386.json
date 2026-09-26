@@ -22,7 +22,7 @@
   "facts" : [ {
     "key" : "fin.revenue.2026-01.Q2",
     "name" : "매출액",
-    "display" : "3918.9억원",
+    "display" : "3,918.9억원",
     "sign" : "+",
     "period" : "2026-01.Q2"
   }, {
@@ -46,7 +46,7 @@
   }, {
     "key" : "fin.revenue.2025-11.Q4",
     "name" : "매출액",
-    "display" : "2516.9억원",
+    "display" : "2,516.9억원",
     "sign" : "+",
     "period" : "2025-11.Q4"
   }, {

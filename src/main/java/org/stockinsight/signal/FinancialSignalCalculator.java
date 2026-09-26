@@ -2,6 +2,7 @@ package org.stockinsight.signal;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -29,10 +30,14 @@ public final class FinancialSignalCalculator {
     private FinancialSignalCalculator() {
     }
 
-    public static List<SignalDraft> calculate(FinancialSummary summary, LocalDate asOf) {
+    /**
+     * @return 신호 초안과, "최신 재무 미확인"이 시간만으로 다시 바뀔 수 있는 다음 날(D-43). 이미 그 신호가 활성이거나
+     *         재무가 아예 없으면 null이다(그 뒤로는 재무 변경이나 규칙 버전 변경만이 재판정 계기다).
+     */
+    public static CalculationResult calculate(FinancialSummary summary, LocalDate asOf) {
         List<SignalDraft> drafts = new ArrayList<>();
         if (!summary.hasAnyReport() || summary.quarters().isEmpty()) {
-            return drafts;
+            return new CalculationResult(drafts, null);
         }
         boolean nonKrw = !KRW.equals(summary.currency());
         LocalDate latestPeriodEnd = summary.latestPeriodEnd();
@@ -60,8 +65,12 @@ public final class FinancialSignalCalculator {
         lossStreakSignals(summary.quarters(), latestPeriodEnd).forEach(drafts::add);
         capitalImpairmentSignals(summary.quarters(), latestPeriodEnd).forEach(drafts::add);
 
-        drafts.addAll(dataLimitSignals(summary, asOf));
-        return drafts;
+        DataLimitResult dataLimit = dataLimitSignals(summary, asOf);
+        drafts.addAll(dataLimit.drafts());
+        return new CalculationResult(drafts, dataLimit.staleRecheckAt());
+    }
+
+    public record CalculationResult(List<SignalDraft> drafts, LocalDate staleRecheckAt) {
     }
 
     // ---- 매출 큰 폭 증감 ----
@@ -301,7 +310,7 @@ public final class FinancialSignalCalculator {
 
     // ---- 데이터 한계 ----
 
-    private static List<SignalDraft> dataLimitSignals(FinancialSummary summary, LocalDate asOf) {
+    private static DataLimitResult dataLimitSignals(FinancialSummary summary, LocalDate asOf) {
         List<SignalDraft> out = new ArrayList<>();
         QuarterEntry latest = summary.quarters().get(0);
         String latestKey = latest.key().stateBasisKey();
@@ -323,10 +332,15 @@ public final class FinancialSignalCalculator {
         if (!latest.balanceConsistent()) {
             out.add(dataLimitSignal(SignalType.FIN_DATA_INCONSISTENT, latestKey, latest.periodEnd(), latest.receiptNo()));
         }
-        if (isStale(latest, asOf)) {
-            out.add(dataLimitSignal(SignalType.FIN_DATA_STALE, latestKey, latest.periodEnd(), latest.receiptNo()));
+        StaleAssessment stale = assessStale(latest, asOf);
+        if (stale.stale()) {
+            Map<String, Object> calc = new LinkedHashMap<>();
+            calc.put("periodLabel", latest.periodEnd().toString());
+            calc.put("deadline", stale.deadline().toString());
+            out.add(new SignalDraft(SignalType.FIN_DATA_STALE, latestKey, SignalNature.STATE, SignalDirection.UNCERTAIN,
+                    SignalSeverity.LOW, latest.periodEnd(), null, calc, List.of(), latest.receiptNo(), true));
         }
-        return out;
+        return new DataLimitResult(out, stale.nextRecheckDate());
     }
 
     private static SignalDraft dataLimitSignal(SignalType type, String basisKey, LocalDate occurredOn, String receiptNo) {
@@ -334,12 +348,27 @@ public final class FinancialSignalCalculator {
                 occurredOn, null, Map.of("periodLabel", occurredOn.toString()), List.of(), receiptNo, true);
     }
 
-    private static boolean isStale(QuarterEntry latest, LocalDate asOf) {
-        int nextDeadlineDays = latest.key().quarterNumber() == 3
+    /**
+     * "최신 재무 미확인" 판정(D-43, 서비스 내부 데이터 품질 기준. 실제 법정 제출기한과는 다르다). 다음 기간
+     * 종료월의 말일 + 기한일(분기·반기 60일, 사업보고서 120일) + 7일 유예가 지나면(달력일) 미확인이다.
+     */
+    static StaleAssessment assessStale(QuarterEntry latest, LocalDate asOf) {
+        int deadlineDays = latest.key().quarterNumber() == 3
                 ? FinancialRuleCatalog.ANNUAL_DEADLINE_DAYS : FinancialRuleCatalog.QUARTERLY_DEADLINE_DAYS;
-        LocalDate nextPeriodEnd = latest.periodEnd().plusMonths(3);
-        LocalDate deadline = nextPeriodEnd.plusDays(nextDeadlineDays).plusDays(FinancialRuleCatalog.STALE_GRACE_DAYS);
-        return asOf.isAfter(deadline);
+        LocalDate nextPeriodEnd = YearMonth.from(latest.periodEnd().plusMonths(3)).atEndOfMonth();
+        LocalDate deadline = nextPeriodEnd.plusDays(deadlineDays);
+        LocalDate staleFrom = deadline.plusDays(FinancialRuleCatalog.STALE_GRACE_DAYS + 1);
+        boolean stale = !asOf.isBefore(staleFrom);
+        return new StaleAssessment(stale, deadline, stale ? null : staleFrom);
+    }
+
+    /**
+     * @param nextRecheckDate 시간만으로 판정이 바뀌는 다음 날. 이미 미확인이면 그런 날이 없다(null, D-43).
+     */
+    record StaleAssessment(boolean stale, LocalDate deadline, LocalDate nextRecheckDate) {
+    }
+
+    private record DataLimitResult(List<SignalDraft> drafts, LocalDate staleRecheckAt) {
     }
 
     // ---- 공통 유틸 ----
