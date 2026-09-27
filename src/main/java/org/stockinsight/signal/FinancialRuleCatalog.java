@@ -12,7 +12,7 @@ import org.stockinsight.financial.FinancialRatios;
 public final class FinancialRuleCatalog {
 
     /** 규칙 버전. 바뀌면 모든 기업을 다시 판정한다. {@code analysis} 패키지가 입력 신호의 규칙 버전으로 참조한다. */
-    public static final String RULE_VERSION = "fin-2";
+    public static final String RULE_VERSION = "fin-3";
 
     /** 매출 비교 기준값: 분기 10억, 연간 40억 (미만이면 증가율을 계산하지 않는다). */
     static final BigDecimal REVENUE_BASE_QUARTER = FinancialRatios.REVENUE_BASE_QUARTER;

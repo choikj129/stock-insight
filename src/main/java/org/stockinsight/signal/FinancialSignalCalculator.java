@@ -13,6 +13,7 @@ import org.stockinsight.financial.AnnualEntry;
 import org.stockinsight.financial.FinancialFormat;
 import org.stockinsight.financial.FinancialRatios;
 import org.stockinsight.financial.FinancialSummary;
+import org.stockinsight.financial.FlowRuns;
 import org.stockinsight.financial.MetricValue;
 import org.stockinsight.financial.PeriodKey;
 import org.stockinsight.financial.QuarterEntry;
@@ -43,13 +44,19 @@ public final class FinancialSignalCalculator {
         LocalDate latestPeriodEnd = summary.latestPeriodEnd();
 
         List<FlowPeriod> flowPeriods = new ArrayList<>();
-        for (QuarterEntry q : summary.quarters()) {
-            if (q.flowSignalEligible()) {
-                flowPeriods.add(FlowPeriod.of(q));
+        List<QuarterEntry> quarters = summary.quarters();
+        for (int i = 0; i < quarters.size(); i++) {
+            if (quarters.get(i).flowSignalEligible()) {
+                flowPeriods.add(FlowPeriod.of(quarters.get(i),
+                        Math.abs(FlowRuns.signedQuarterRun(quarters, i, FlowRuns::revenueYoySign)),
+                        Math.abs(FlowRuns.signedQuarterRun(quarters, i, FlowRuns::marginYoySign))));
             }
         }
-        for (AnnualEntry a : summary.annual()) {
-            flowPeriods.add(FlowPeriod.of(a));
+        List<AnnualEntry> annual = summary.annual();
+        for (int i = 0; i < annual.size(); i++) {
+            flowPeriods.add(FlowPeriod.of(annual.get(i),
+                    Math.abs(FlowRuns.signedAnnualRun(annual, i, FlowRuns::revenueYoySign)),
+                    Math.abs(FlowRuns.signedAnnualRun(annual, i, FlowRuns::marginYoySign))));
         }
         for (FlowPeriod period : flowPeriods) {
             boolean active = period.periodEnd.equals(latestPeriodEnd);
@@ -102,7 +109,7 @@ public final class FinancialSignalCalculator {
         }
         Map<String, Object> calc = calcValues(p, "revenueYoyPct", pct);
         return Optional.of(new SignalDraft(SignalType.FIN_REVENUE_CHANGE, p.basisKey, SignalNature.CHANGE, direction,
-                severity, p.periodEnd, null, calc, List.of("revenue"), p.receiptNo, active));
+                severity, p.periodEnd, p.revenueRun, calc, List.of("revenue"), p.receiptNo, active));
     }
 
     // ---- 영업이익률 큰 폭 변화 ----
@@ -129,7 +136,7 @@ public final class FinancialSignalCalculator {
         calc.put("marginCurrentPct", marginCurrent);
         calc.put("marginPriorPct", marginPrior);
         return Optional.of(new SignalDraft(SignalType.FIN_OPERATING_MARGIN_CHANGE, p.basisKey, SignalNature.CHANGE,
-                direction, severity, p.periodEnd, null, calc, List.of("operating_margin"), p.receiptNo, active));
+                direction, severity, p.periodEnd, p.marginRun, calc, List.of("operating_margin"), p.receiptNo, active));
     }
 
     // ---- 흑자·적자 전환 ----
@@ -402,20 +409,25 @@ public final class FinancialSignalCalculator {
         return calc;
     }
 
-    /** 분기·연간 판정을 같은 코드로 다루기 위한 흐름 지표 묶음. */
+    /**
+     * 분기·연간 판정을 같은 코드로 다루기 위한 흐름 지표 묶음. {@code revenueRun}·{@code marginRun}은 이 기간까지 같은
+     * 부호의 전년 동기 변화가 이어진 수(분기끼리·연간끼리, {@link FlowRuns})로, 매출·영업이익률 변화 신호의 지속이다.
+     * 전환·부채비율 급등에는 지속을 두지 않는다(D-61: 영업이익의 연속은 영업적자 지속, 부채비율은 기준점이 같아 셈이 무의미).
+     */
     private record FlowPeriod(String basisKey, PeriodKey periodKey, LocalDate periodEnd,
             MetricValue revenue, MetricValue operatingIncome, FinancialFormat format, String receiptNo,
-            BigDecimal revenueBase, boolean isAnnual) {
+            BigDecimal revenueBase, boolean isAnnual, int revenueRun, int marginRun) {
 
-        static FlowPeriod of(QuarterEntry q) {
+        static FlowPeriod of(QuarterEntry q, int revenueRun, int marginRun) {
             return new FlowPeriod(q.key().flowBasisKey(q.reportType()), q.key(), q.periodEnd(), q.revenue(),
-                    q.operatingIncome(), q.format(), q.receiptNo(), FinancialRuleCatalog.REVENUE_BASE_QUARTER, false);
+                    q.operatingIncome(), q.format(), q.receiptNo(), FinancialRuleCatalog.REVENUE_BASE_QUARTER, false,
+                    revenueRun, marginRun);
         }
 
-        static FlowPeriod of(AnnualEntry a) {
+        static FlowPeriod of(AnnualEntry a, int revenueRun, int marginRun) {
             return new FlowPeriod(a.basisKey(), new PeriodKey(a.fiscalYearStart(), 4),
                     a.periodEnd(), a.revenue(), a.operatingIncome(), a.format(), a.receiptNo(),
-                    FinancialRuleCatalog.REVENUE_BASE_ANNUAL, true);
+                    FinancialRuleCatalog.REVENUE_BASE_ANNUAL, true, revenueRun, marginRun);
         }
     }
 }

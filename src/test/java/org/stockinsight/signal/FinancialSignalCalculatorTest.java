@@ -239,6 +239,97 @@ class FinancialSignalCalculatorTest {
         assertThat(signals.get(0).persistence()).isEqualTo(4);
     }
 
+    // ---- 변화 신호의 지속 (ai-analysis.md §3.7, D-61) ----
+
+    @Test
+    void revenuePersistenceCountsSameSignQuartersBackAndStopsAtDerivedQ4() {
+        // 2025년 3분기(증가) → 4분기 파생(비교 없음) → 2026년 1분기 +5%(문턱 아래라도 같은 부호) → 2분기 +30%(신호)
+        List<QuarterEntry> ascending = List.of(
+                flowQuarter(LocalDate.of(2025, 1, 1), 3, LocalDate.of(2025, 9, 30), amounts("25", "20"), MetricValue.EMPTY, false),
+                flowQuarter(LocalDate.of(2025, 1, 1), 4, LocalDate.of(2025, 12, 31), amounts("25", "20"), MetricValue.EMPTY, true),
+                flowQuarter(FY_START, 1, LocalDate.of(2026, 3, 31), amounts("21", "20"), MetricValue.EMPTY, false),
+                flowQuarter(FY_START, 2, LocalDate.of(2026, 6, 30), amounts("26", "20"), MetricValue.EMPTY, false));
+
+        List<SignalDraft> signals = signalsOf(summaryOf(reversed(ascending)), SignalType.FIN_REVENUE_CHANGE);
+        assertThat(signals).hasSize(1);
+        assertThat(signals.get(0).persistence()).isEqualTo(2);
+    }
+
+    @Test
+    void revenuePersistenceStopsAtOppositeSign() {
+        List<QuarterEntry> ascending = List.of(
+                flowQuarter(FY_START, 1, LocalDate.of(2026, 3, 31), amounts("19", "20"), MetricValue.EMPTY, false),
+                flowQuarter(FY_START, 2, LocalDate.of(2026, 6, 30), amounts("22", "20"), MetricValue.EMPTY, false),
+                flowQuarter(FY_START, 3, LocalDate.of(2026, 9, 30), amounts("28", "20"), MetricValue.EMPTY, false));
+
+        List<SignalDraft> signals = signalsOf(summaryOf(reversed(ascending)), SignalType.FIN_REVENUE_CHANGE);
+        assertThat(signals).hasSize(1);
+        assertThat(signals.get(0).persistence()).isEqualTo(2);
+    }
+
+    @Test
+    void marginPersistenceCountsSameSignMarginDiffs() {
+        // 매출 20억 고정. 1분기 이익률 15% vs 10%(+5%p, 신호 없음), 2분기 25% vs 10%(+15%p, 신호).
+        List<QuarterEntry> ascending = List.of(
+                flowQuarter(FY_START, 1, LocalDate.of(2026, 3, 31), amounts("20", "20"), amounts("3", "2"), false),
+                flowQuarter(FY_START, 2, LocalDate.of(2026, 6, 30), amounts("20", "20"), amounts("5", "2"), false));
+
+        List<SignalDraft> signals = signalsOf(summaryOf(reversed(ascending)), SignalType.FIN_OPERATING_MARGIN_CHANGE);
+        assertThat(signals).hasSize(1);
+        assertThat(signals.get(0).persistence()).isEqualTo(2);
+    }
+
+    @Test
+    void annualRevenuePersistenceCountsConsecutiveFiscalYears() {
+        List<AnnualEntry> annualDesc = List.of(
+                annualEntry(LocalDate.of(2025, 1, 1), amounts("60", "40")),
+                annualEntry(LocalDate.of(2024, 1, 1), amounts("40", "35")),
+                annualEntry(LocalDate.of(2023, 1, 1), amounts("35", "36")));
+        QuarterEntry latestQuarter = flowQuarter(LocalDate.of(2025, 1, 1), 4, LocalDate.of(2025, 12, 31),
+                MetricValue.EMPTY, MetricValue.EMPTY, true);
+        FinancialSummary summary = new FinancialSummary(1L, true, "CFS", "KRW", latestQuarter.periodEnd(),
+                latestQuarter.receiptNo(), List.of(), List.of(latestQuarter), annualDesc);
+
+        List<SignalDraft> signals = signalsOf(summary, SignalType.FIN_REVENUE_CHANGE);
+        assertThat(signals).hasSize(1);
+        assertThat(signals.get(0).persistence()).isEqualTo(2);
+    }
+
+    @Test
+    void turnAndDebtRatioJumpHaveNoPersistence() {
+        MetricValue revenue = revenue(BASE, BASE);
+        MetricValue operating = income(BASE.multiply(new BigDecimal("0.05")), BASE.multiply(new BigDecimal("-0.05")));
+        assertThat(signalsOf(oneQuarterSummary(revenue, operating), SignalType.FIN_OPERATING_TURN).get(0).persistence()).isNull();
+
+        QuarterEntry q = quarterWithBalance(1, new BigDecimal("200"), new BigDecimal("150"));
+        assertThat(signalsOf(summaryOf(q), SignalType.FIN_DEBT_RATIO_JUMP).get(0).persistence()).isNull();
+    }
+
+    /** 억 원 단위 문자열로 당기·전기 값을 만든다. */
+    private static MetricValue amounts(String currentEok, String priorEok) {
+        BigDecimal eok = new BigDecimal("100000000");
+        return new MetricValue(new BigDecimal(currentEok).multiply(eok), new BigDecimal(priorEok).multiply(eok));
+    }
+
+    private static QuarterEntry flowQuarter(LocalDate fiscalYearStart, int quarterNumber, LocalDate periodEnd,
+            MetricValue revenue, MetricValue operatingIncome, boolean derived) {
+        PeriodType reportType = switch (quarterNumber) {
+            case 1 -> PeriodType.Q1;
+            case 2 -> PeriodType.H1;
+            case 3 -> PeriodType.Q3;
+            default -> PeriodType.FY;
+        };
+        return new QuarterEntry(new PeriodKey(fiscalYearStart, quarterNumber), reportType, periodEnd, "R1", derived, true,
+                FinancialFormat.GENERAL, true, revenue, operatingIncome, MetricValue.EMPTY,
+                MetricValue.EMPTY, MetricValue.EMPTY, MetricValue.EMPTY, MetricValue.EMPTY);
+    }
+
+    private static AnnualEntry annualEntry(LocalDate fiscalYearStart, MetricValue revenue) {
+        return new AnnualEntry(fiscalYearStart, fiscalYearStart.plusYears(1).minusDays(1), "R" + fiscalYearStart.getYear(),
+                false, true, FinancialFormat.GENERAL, revenue, MetricValue.EMPTY, MetricValue.EMPTY,
+                MetricValue.EMPTY, MetricValue.EMPTY, MetricValue.EMPTY, MetricValue.EMPTY);
+    }
+
     // ---- FIN_DATA_STALE 기한 (D-43) ----
 
     @Test
