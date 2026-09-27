@@ -34,20 +34,29 @@ public class AnalysisRenderer {
         this.financialService = financialService;
     }
 
-    /** 토큰을 값 스냅샷의 표시 값으로 치환한다. HTML 이스케이프를 거친다. 모르는 토큰은 예외를 던진다. */
+    /**
+     * 토큰을 값 스냅샷의 값으로 치환한다. 결과 전체가 HTML 이스케이프를 거친다 — 토큰 값뿐 아니라 토큰 사이의 AI 문장도
+     * 이스케이프한다(AI 출력은 외부 입력으로 다룬다, 2026-09-27 D-55 구현 중 보안 점검). 모르는 토큰은 예외를 던진다.
+     * 사실 값은 스냅샷 원값으로 서식을 만들고(D-41), 토큰 바로 뒤 조사는 그 값의 끝소리에 맞춘다(D-56). 조사 보정은
+     * 이스케이프 전에 정해진 조사 문자열만 바꾼다.
+     */
     public String render(String textWithTokens, ValueSnapshot snapshot) {
         if (textWithTokens == null) {
             return null;
         }
         Matcher m = TOKEN.matcher(textWithTokens);
         StringBuilder out = new StringBuilder();
+        int last = 0;
+        String previousValue = null;
         while (m.find()) {
+            out.append(escapeHtml(afterToken(previousValue, textWithTokens.substring(last, m.start()))));
+            last = m.end();
             String inner = m.group(1);
             int dot = inner.indexOf('.');
             String kind = inner.substring(0, dot);
             String replacement = switch (kind) {
                 case "fin" -> Optional.ofNullable(snapshot.facts().get(inner))
-                        .map(ValueSnapshot.FactSnapshot::display)
+                        .map(f -> readerDisplay(inner, f))
                         .orElseThrow(() -> new IllegalStateException("값 스냅샷에 없는 사실 토큰: " + inner));
                 case "per" -> Optional.ofNullable(snapshot.periodLabels().get(inner.substring(dot + 1)))
                         .orElseThrow(() -> new IllegalStateException("값 스냅샷에 없는 기간 토큰: " + inner));
@@ -56,14 +65,60 @@ public class AnalysisRenderer {
                     if (signal == null) {
                         throw new IllegalStateException("값 스냅샷에 없는 신호 토큰: " + inner);
                     }
-                    yield StaticContent.badgeName(signal.type(), signal.direction());
+                    String label = StaticContent.badgeName(signal.type(), signal.direction());
+                    // D-58: 배지가 문장·절의 앞머리(칩 후보)면 대괄호로 구분한다("[매출 큰 폭 감소] 매출은 …") — 화면의
+                    // 칩(UI 미구현) 대신, 문자열만 있는 자리(감사 로그·검토 자료)에서도 "매출 큰 폭 감소 매출은…"처럼
+                    // 배지 이름과 주어가 붙어 읽히지 않게 한다. "… 신호" 앞 이름 배지는 문장 속 말로 그대로 둔다.
+                    boolean leadingBadge = !KoreanText.isNameBadge(textWithTokens, m.end())
+                            && KoreanText.isLeadingBadge(textWithTokens, m.start());
+                    yield leadingBadge ? "[" + label + "]" : label;
                 }
                 default -> throw new IllegalStateException("알 수 없는 토큰: " + inner);
             };
-            m.appendReplacement(out, Matcher.quoteReplacement(escapeHtml(replacement)));
+            out.append(escapeHtml(replacement));
+            previousValue = replacement;
         }
-        m.appendTail(out);
+        out.append(escapeHtml(afterToken(previousValue, textWithTokens.substring(last))));
         return out.toString();
+    }
+
+    /**
+     * 섹션 글을 문장 목록으로 렌더링한다(화면은 문장마다 줄을 바꾼다, D-56). 검증기와 같은 문장 경계로 원문(토큰 상태)에서
+     * 나눈 뒤 문장마다 {@link #render}한다 — 표시 값 안의 '.'(예: 13.7억)이 경계가 되지 않는다.
+     */
+    public List<String> renderSentences(String textWithTokens, ValueSnapshot snapshot) {
+        if (textWithTokens == null) {
+            return List.of();
+        }
+        return KoreanText.splitSentences(textWithTokens).stream().map(s -> render(s, snapshot)).toList();
+    }
+
+    private static String afterToken(String previousValue, String literal) {
+        return previousValue == null ? literal : KoreanText.adjustParticle(previousValue, literal);
+    }
+
+    /**
+     * 사실의 사용자 표시 값. 원값·단위로 렌더링 때 서식을 만든다(D-41). 원값이 없거나 단위를 모르면(상태·전환 사실의 닫힌
+     * 문구 등) 저장된 표시 문자열을 쓴다. AI 문장 안에 박히는 변화량(%p·`_yoy`의 %)은 부호를 뺀다(D-58) — 방향은
+     * 같은 절의 증감 어휘가 말하고 검증기 규칙 6이 어휘와 부호의 일치를 보장하므로, 부호는 겹말이다.
+     */
+    static String readerDisplay(String factKey, ValueSnapshot.FactSnapshot fact) {
+        String unit = fact.unit();
+        if (fact.rawValue() == null || unit == null) {
+            return fact.display();
+        }
+        boolean known = "%".equals(unit) || "%p".equals(unit) || "분기".equals(unit) || unit.equals(fact.currency());
+        if (!known) {
+            return fact.display();
+        }
+        return PeriodLabels.formatForSentence(metricOf(factKey), fact.rawValue(), unit);
+    }
+
+    /** "fin.<지표>.<기간 키>"의 지표 이름. 기간 키에도 점이 있어 두 번째 점까지만 자른다. */
+    private static String metricOf(String factKey) {
+        int first = factKey.indexOf('.');
+        int second = factKey.indexOf('.', first + 1);
+        return second < 0 ? factKey.substring(first + 1) : factKey.substring(first + 1, second);
     }
 
     /** 섹션 옆에 보여줄 데이터 한계 문구. 렌더링 시점의 현재 활성 데이터 한계 신호로 만든다(D-42, 스냅샷을 쓰지 않는다). */

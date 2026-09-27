@@ -58,6 +58,39 @@ class AnalysisRendererTest {
     }
 
     @Test
+    void stateAndTurnFactsRenderFromSnapshotDisplayWithoutRendererChange() {
+        // D-55 점검표 17: 상태·전환 사실도 다른 사실처럼 값 스냅샷의 표시 값으로 바뀐다(렌더러는 그대로). 흑자·적자 글자는 코드가 쓴다.
+        ValueSnapshot snapshot = new ValueSnapshot(
+                java.util.Map.of(
+                        "fin.net_income_turn.2026-01.Q2", new ValueSnapshot.FactSnapshot("적자에서 흑자로",
+                                new java.math.BigDecimal("300000000"), FinancialExplainInputBuilder.STATE_UNIT, "2026-01.Q2",
+                                "2026-06-30", "R1", "CFS", "KRW"),
+                        "fin.net_income_status.2026-01.Q2", new ValueSnapshot.FactSnapshot("적자",
+                                new java.math.BigDecimal("-5"), FinancialExplainInputBuilder.STATE_UNIT, "2026-01.Q2",
+                                "2026-06-30", "R1", "CFS", "KRW")),
+                java.util.Map.of(), java.util.Map.of(), List.of(),
+                new ValueSnapshot.Header("CFS", "KRW", "GENERAL", "2026-01.Q2"));
+
+        assertThat(renderer.render("당기순이익은 {fin.net_income_turn.2026-01.Q2} 바뀌었어요.", snapshot))
+                .isEqualTo("당기순이익은 적자에서 흑자로 바뀌었어요.");
+        assertThat(renderer.render("영업이익과 달리 {fin.net_income_status.2026-01.Q2}였어요.", snapshot))
+                .isEqualTo("영업이익과 달리 적자였어요.");
+    }
+
+    @Test
+    void renderEscapesAiTextBetweenTokensNotOnlyTokenValues() {
+        // 보안 점검(2026-09-27): 이전에는 토큰 값만 이스케이프하고 토큰 사이의 AI 문장은 그대로 붙였다. AI 출력도 외부 입력이다.
+        ValueSnapshot snapshot = new ValueSnapshot(
+                java.util.Map.of("fin.revenue.2026-01.Q2", new ValueSnapshot.FactSnapshot("40.0억원",
+                        new java.math.BigDecimal("4000000000"), "KRW", "2026-01.Q2", "2026-06-30", "R1", "CFS", "KRW")),
+                java.util.Map.of(), java.util.Map.of(), List.of(),
+                new ValueSnapshot.Header("CFS", "KRW", "GENERAL", "2026-01.Q2"));
+
+        assertThat(renderer.render("<script>x</script>매출은 {fin.revenue.2026-01.Q2}이에요 & \"끝\"", snapshot))
+                .isEqualTo("&lt;script&gt;x&lt;/script&gt;매출은 40.0억원이에요 &amp; &quot;끝&quot;");
+    }
+
+    @Test
     void publishedAnalysisIsInvalidatedAssoonAsItsReferencedSignalIsWithdrawn() {
         seedQuarter("4,000,000,000", "2,000,000,000", "R1"); // +100%: FIN_REVENUE_CHANGE 활성
         signalJob.run();
@@ -130,7 +163,7 @@ class AnalysisRendererTest {
         NewAnalysis draft = new NewAnalysis(TargetType.COMPANY, String.valueOf(companyId), AnalysisKind.FINANCIAL_EXPLAIN,
                 built.fingerprint(), AnalysisStatus.DRAFT, null, built.input(), built.snapshot(), "fx-schema-1", "fx-v1",
                 "claude-sonnet-5", FinancialExplainInputBuilder.INPUT_BUILDER_VERSION, "fin-2", 100, 50, 0,
-                java.math.BigDecimal.ONE, null, 1);
+                java.math.BigDecimal.ONE, null, 1, null);
         long id = analysisService.save(draft, Instant.now());
         analysisService.publish(id, TargetType.COMPANY, String.valueOf(companyId), AnalysisKind.FINANCIAL_EXPLAIN, Instant.now());
         return analysisService.findCurrent(TargetType.COMPANY, String.valueOf(companyId), AnalysisKind.FINANCIAL_EXPLAIN)

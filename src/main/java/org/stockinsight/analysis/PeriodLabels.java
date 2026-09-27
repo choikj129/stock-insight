@@ -16,27 +16,42 @@ final class PeriodLabels {
     private PeriodLabels() {
     }
 
-    /** 12월 결산은 "2026년 2분기", 그 밖은 "2026.04~06(1분기)". */
+    /**
+     * 12월 결산은 "2026년 2분기", 그 밖은 "2026년 4~6월"(D-59: 회계연도 분기 번호 "(1분기)"는 흔히 쓰는 달력 분기와
+     * 부딪혀 빼고 달만 쓴다). 연도를 넘는 분기는 "2025년 11월~2026년 1월"처럼 달마다 연도를 붙인다.
+     */
     static String ofQuarter(PeriodKey key, Integer fiscalMonth) {
         if (fiscalMonth != null && fiscalMonth == 12) {
             return key.fiscalYearStart().getYear() + "년 " + key.quarterNumber() + "분기";
         }
         LocalDate start = key.fiscalYearStart().plusMonths(3L * (key.quarterNumber() - 1));
         LocalDate end = start.plusMonths(3).minusDays(1);
-        String range = start.getYear() == end.getYear()
-                ? "%d.%02d~%02d".formatted(start.getYear(), start.getMonthValue(), end.getMonthValue())
-                : "%d.%02d~%d.%02d".formatted(start.getYear(), start.getMonthValue(), end.getYear(), end.getMonthValue());
-        return range + "(" + key.quarterNumber() + "분기)";
+        return start.getYear() == end.getYear()
+                ? "%d년 %d~%d월".formatted(start.getYear(), start.getMonthValue(), end.getMonthValue())
+                : "%d년 %d월~%d년 %d월".formatted(start.getYear(), start.getMonthValue(), end.getYear(), end.getMonthValue());
     }
 
-    /** 12월 결산은 "2025년(연간)", 그 밖은 "2025.04~2026.03 회계연도". */
-    static String ofAnnual(LocalDate fiscalYearStart, Integer fiscalMonth) {
-        if (fiscalMonth != null && fiscalMonth == 12) {
-            return fiscalYearStart.getYear() + "년(연간)";
+    /**
+     * 12월 결산이고 12개월짜리 회계연도면 "2025년(연간)", 그 밖의 12개월짜리는 "2025.04~2026.03 회계연도".
+     * 12개월이 아닌 회계연도(결산기 변경 등, D-59)는 실제 시작~끝 달로 "2025.11~12 회계연도"처럼 쓴다 — "(연간)"이라고
+     * 하면 12개월 치인 것처럼 읽힌다(2386 사례, implementation-plan.md §7.4.33).
+     */
+    static String ofAnnual(LocalDate fiscalYearStart, LocalDate periodEnd, Integer fiscalMonth) {
+        boolean irregular = periodEnd != null
+                && Math.abs(java.time.Period.between(fiscalYearStart, periodEnd.plusDays(1)).toTotalMonths() - 12) >= 1;
+        if (!irregular) {
+            if (fiscalMonth != null && fiscalMonth == 12) {
+                return fiscalYearStart.getYear() + "년(연간)";
+            }
+            LocalDate end = fiscalYearStart.plusYears(1).minusDays(1);
+            return "%d.%02d~%d.%02d 회계연도".formatted(fiscalYearStart.getYear(), fiscalYearStart.getMonthValue(),
+                    end.getYear(), end.getMonthValue());
         }
-        LocalDate end = fiscalYearStart.plusYears(1).minusDays(1);
-        return "%d.%02d~%d.%02d 회계연도".formatted(fiscalYearStart.getYear(), fiscalYearStart.getMonthValue(),
-                end.getYear(), end.getMonthValue());
+        return (fiscalYearStart.getYear() == periodEnd.getYear()
+                ? "%d.%02d~%02d".formatted(fiscalYearStart.getYear(), fiscalYearStart.getMonthValue(), periodEnd.getMonthValue())
+                : "%d.%02d~%d.%02d".formatted(fiscalYearStart.getYear(), fiscalYearStart.getMonthValue(),
+                        periodEnd.getYear(), periodEnd.getMonthValue()))
+                + " 회계연도";
     }
 
     /** 표시 값: 비율은 부호 있는 %(소수 1자리), 개수는 정수, 금액은 억·조 단위. */
@@ -46,6 +61,34 @@ final class PeriodLabels {
             case "분기" -> value.abs().stripTrailingZeros().toPlainString() + "분기";
             default -> formatAmount(value, unit);
         };
+    }
+
+    /**
+     * 사용자에게 보이는 표시 값(렌더링 때, D-41·D-56). {@link #formatValue}와 같되, 수준 비율(영업이익률·부채비율 등
+     * {@code _yoy}가 아닌 %)에는 '+'를 붙이지 않는다 — 부호가 붙은 비율은 변화량으로 읽힌다. 음수의 '-'는 값이라 남긴다.
+     * AI 입력의 표시 값은 아직 {@link #formatValue}를 쓴다(다음 입력 구성 변경 때 맞춘다, D-56).
+     */
+    static String formatForReader(String metric, BigDecimal value, String unit) {
+        if ("%".equals(unit) && !metric.endsWith("_yoy")) {
+            return value.setScale(1, RoundingMode.HALF_UP).toPlainString() + unit;
+        }
+        return formatValue(value, unit);
+    }
+
+    /**
+     * AI 문장 안에 토큰으로 박히는 값(D-58). 변화량(`_yoy`의 %, 모든 %p)은 부호를 완전히 뺀다("69.3% 줄었고",
+     * "28.7%p 높아졌어요") — 방향은 같은 절의 증감 어휘가 말하고 검증기 규칙 6이 어휘와 부호의 일치를 보장하므로, 부호는
+     * 겹말이다("-69.3% 줄었어요"). 수준값(그 밖의 %·금액)은 {@link #formatForReader}와 같다 — 음수는 값이라 남는다.
+     */
+    static String formatForSentence(String metric, BigDecimal value, String unit) {
+        if (isChangeQuantity(metric, unit)) {
+            return value.abs().setScale(1, RoundingMode.HALF_UP).toPlainString() + unit;
+        }
+        return formatForReader(metric, value, unit);
+    }
+
+    private static boolean isChangeQuantity(String metric, String unit) {
+        return "%p".equals(unit) || ("%".equals(unit) && metric.endsWith("_yoy"));
     }
 
     private static String signed(BigDecimal value) {
