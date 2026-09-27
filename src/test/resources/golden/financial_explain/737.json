@@ -14,153 +14,65 @@
   "sections" : [ "overview", "sales_profit", "structure", "history" ],
   "periods" : [ {
     "key" : "2026-01.Q2",
-    "label" : "2026년 2분기"
+    "kind" : "QUARTER"
   }, {
-    "key" : "2025-01.Q4",
-    "label" : "2025년(연간)"
+    "key" : "2026-01.Q1",
+    "kind" : "QUARTER"
+  }, {
+    "key" : "2025-01.Q3",
+    "kind" : "QUARTER"
+  }, {
+    "key" : "2025-01.Q1",
+    "kind" : "QUARTER"
   } ],
   "facts" : [ {
     "key" : "fin.revenue.2026-01.Q2",
     "name" : "매출액",
-    "display" : "52.9억원",
-    "sign" : "+",
-    "period" : "2026-01.Q2"
-  }, {
-    "key" : "fin.revenue_prior.2026-01.Q2",
-    "name" : "매출액(전년 동기)",
-    "display" : "172.4억원",
     "sign" : "+",
     "period" : "2026-01.Q2"
   }, {
     "key" : "fin.revenue_yoy.2026-01.Q2",
-    "name" : "매출 증가율(전년 같은 분기 대비)",
-    "display" : "-69.3%",
+    "name" : "매출 감소율(전년 같은 분기 대비)",
     "sign" : "-",
     "period" : "2026-01.Q2"
   }, {
     "key" : "fin.operating_income.2026-01.Q2",
     "name" : "영업이익",
-    "display" : "-63.7억원",
-    "sign" : "-",
-    "period" : "2026-01.Q2"
-  }, {
-    "key" : "fin.operating_income_prior.2026-01.Q2",
-    "name" : "영업이익(전년 동기)",
-    "display" : "-30.5억원",
     "sign" : "-",
     "period" : "2026-01.Q2"
   }, {
     "key" : "fin.operating_margin.2026-01.Q2",
     "name" : "영업이익률",
-    "display" : "-120.4%",
-    "sign" : "-",
-    "period" : "2026-01.Q2"
-  }, {
-    "key" : "fin.operating_margin_prior.2026-01.Q2",
-    "name" : "영업이익률(전년 동기)",
-    "display" : "-17.7%",
     "sign" : "-",
     "period" : "2026-01.Q2"
   }, {
     "key" : "fin.operating_margin_diff.2026-01.Q2",
-    "name" : "영업이익률 변화",
-    "display" : "-102.6%p",
+    "name" : "영업이익률 하락폭(전년 같은 분기 대비)",
     "sign" : "-",
     "period" : "2026-01.Q2"
   }, {
     "key" : "fin.net_income.2026-01.Q2",
     "name" : "당기순이익",
-    "display" : "12.3억원",
     "sign" : "+",
     "period" : "2026-01.Q2"
   }, {
-    "key" : "fin.net_income_prior.2026-01.Q2",
-    "name" : "당기순이익(전년 동기)",
-    "display" : "-84.9억원",
-    "sign" : "-",
-    "period" : "2026-01.Q2"
-  }, {
-    "key" : "fin.revenue.2025-01.Q4",
-    "name" : "매출액",
-    "display" : "938.3억원",
-    "sign" : "+",
-    "period" : "2025-01.Q4"
-  }, {
-    "key" : "fin.revenue_yoy.2025-01.Q4",
-    "name" : "매출 증가율(전기 대비)",
-    "display" : "-0.4%",
-    "sign" : "-",
-    "period" : "2025-01.Q4"
-  }, {
-    "key" : "fin.operating_income.2025-01.Q4",
-    "name" : "영업이익",
-    "display" : "-3,981만원",
-    "sign" : "-",
-    "period" : "2025-01.Q4"
-  }, {
-    "key" : "fin.operating_margin.2025-01.Q4",
-    "name" : "영업이익률",
-    "display" : "+0.0%",
-    "sign" : "-",
-    "period" : "2025-01.Q4"
-  }, {
-    "key" : "fin.net_income.2025-01.Q4",
-    "name" : "당기순이익",
-    "display" : "-58.0억원",
-    "sign" : "-",
-    "period" : "2025-01.Q4"
-  }, {
-    "key" : "fin.total_assets.2026-01.Q2",
-    "name" : "자산총계",
-    "display" : "3,378.9억원",
-    "sign" : "+",
-    "period" : "2026-01.Q2"
-  }, {
-    "key" : "fin.total_liabilities.2026-01.Q2",
-    "name" : "부채총계",
-    "display" : "2,390.4억원",
-    "sign" : "+",
-    "period" : "2026-01.Q2"
-  }, {
-    "key" : "fin.total_equity.2026-01.Q2",
-    "name" : "자본총계",
-    "display" : "988.5억원",
-    "sign" : "+",
-    "period" : "2026-01.Q2"
-  }, {
-    "key" : "fin.capital_stock.2026-01.Q2",
-    "name" : "자본금",
-    "display" : "40.9억원",
+    "key" : "fin.net_income_turn.2026-01.Q2",
+    "name" : "당기순이익 흑자·적자 전환(전년 같은 분기 대비)",
     "sign" : "+",
     "period" : "2026-01.Q2"
   }, {
     "key" : "fin.debt_ratio.2026-01.Q2",
     "name" : "부채비율",
-    "display" : "+241.8%",
-    "sign" : "+",
-    "period" : "2026-01.Q2"
-  }, {
-    "key" : "fin.debt_ratio_prior_end.2026-01.Q2",
-    "name" : "부채비율(전기말)",
-    "display" : "+161.7%",
     "sign" : "+",
     "period" : "2026-01.Q2"
   }, {
     "key" : "fin.debt_ratio_diff.2026-01.Q2",
-    "name" : "부채비율 변화",
-    "display" : "+80.1%p",
+    "name" : "부채비율 상승폭(지난 회계연도 말 대비)",
     "sign" : "+",
-    "period" : "2026-01.Q2"
-  }, {
-    "key" : "fin.revenue_yoy_run.2026-01.Q2",
-    "name" : "매출 같은 방향 연속 분기 수",
-    "display" : "2분기",
-    "sign" : "-",
     "period" : "2026-01.Q2"
   }, {
     "key" : "fin.operating_loss_run.2026-01.Q2",
     "name" : "연속 영업적자 분기 수",
-    "display" : "2분기",
     "sign" : "+",
     "period" : "2026-01.Q2"
   } ],
@@ -172,8 +84,9 @@
     "direction" : "NEGATIVE",
     "severity" : "HIGH",
     "period" : "2026-01.Q2",
+    "section" : "sales_profit",
     "persistence" : null,
-    "factKeys" : [ "fin.revenue.2026-01.Q2", "fin.revenue_prior.2026-01.Q2", "fin.revenue_yoy.2026-01.Q2" ]
+    "factKeys" : [ "fin.revenue.2026-01.Q2", "fin.revenue_yoy.2026-01.Q2" ]
   }, {
     "ref" : "S2",
     "type" : "FIN_OPERATING_MARGIN_CHANGE",
@@ -182,8 +95,9 @@
     "direction" : "NEGATIVE",
     "severity" : "HIGH",
     "period" : "2026-01.Q2",
+    "section" : "sales_profit",
     "persistence" : null,
-    "factKeys" : [ "fin.operating_margin.2026-01.Q2", "fin.operating_margin_prior.2026-01.Q2", "fin.operating_margin_diff.2026-01.Q2" ]
+    "factKeys" : [ "fin.operating_margin.2026-01.Q2", "fin.operating_margin_diff.2026-01.Q2" ]
   }, {
     "ref" : "S3",
     "type" : "FIN_DEBT_RATIO_JUMP",
@@ -191,9 +105,10 @@
     "nature" : "CHANGE",
     "direction" : "NEGATIVE",
     "severity" : "HIGH",
-    "period" : "2026-01.Q1",
+    "period" : "2026-01.Q2",
+    "section" : "structure",
     "persistence" : null,
-    "factKeys" : [ ]
+    "factKeys" : [ "fin.debt_ratio.2026-01.Q2", "fin.debt_ratio_diff.2026-01.Q2" ]
   }, {
     "ref" : "S4",
     "type" : "FIN_OPERATING_MARGIN_CHANGE",
@@ -202,6 +117,7 @@
     "direction" : "NEGATIVE",
     "severity" : "HIGH",
     "period" : "2026-01.Q1",
+    "section" : "history",
     "persistence" : null,
     "factKeys" : [ ]
   }, {
@@ -212,6 +128,7 @@
     "direction" : "POSITIVE",
     "severity" : "HIGH",
     "period" : "2025-01.Q3",
+    "section" : "history",
     "persistence" : null,
     "factKeys" : [ ]
   }, {
@@ -222,6 +139,7 @@
     "direction" : "NEGATIVE",
     "severity" : "HIGH",
     "period" : "2025-01.Q1",
+    "section" : "history",
     "persistence" : null,
     "factKeys" : [ ]
   }, {
@@ -232,34 +150,51 @@
     "direction" : "NEGATIVE",
     "severity" : "MEDIUM",
     "period" : "2026-01.Q1",
+    "section" : "history",
     "persistence" : null,
     "factKeys" : [ ]
   } ],
   "groups" : [ {
+    "section" : "sales_profit",
     "period" : "2026-01.Q2",
     "topic" : "SALES_PROFIT",
     "refs" : [ "S1", "S2" ],
     "mixedDirection" : false
   }, {
-    "period" : "2026-01.Q1",
+    "section" : "structure",
+    "period" : "2026-01.Q2",
     "topic" : "STRUCTURE",
     "refs" : [ "S3" ],
     "mixedDirection" : false
   }, {
+    "section" : "history",
     "period" : "2026-01.Q1",
     "topic" : "SALES_PROFIT",
     "refs" : [ "S7", "S4" ],
     "mixedDirection" : false
   }, {
+    "section" : "history",
     "period" : "2025-01.Q3",
     "topic" : "SALES_PROFIT",
     "refs" : [ "S5" ],
     "mixedDirection" : false
   }, {
+    "section" : "history",
     "period" : "2025-01.Q1",
     "topic" : "SALES_PROFIT",
     "refs" : [ "S6" ],
     "mixedDirection" : false
+  } ],
+  "sectionFacts" : {
+    "overview" : [ "fin.revenue_yoy.2026-01.Q2", "fin.operating_margin_diff.2026-01.Q2" ],
+    "sales_profit" : [ "fin.revenue.2026-01.Q2", "fin.operating_income.2026-01.Q2", "fin.operating_margin.2026-01.Q2", "fin.net_income.2026-01.Q2", "fin.net_income_turn.2026-01.Q2", "fin.operating_loss_run.2026-01.Q2" ],
+    "structure" : [ "fin.debt_ratio.2026-01.Q2", "fin.debt_ratio_diff.2026-01.Q2" ],
+    "history" : [ ]
+  },
+  "relations" : [ {
+    "type" : "STATE_DIFFERENCE",
+    "factKeys" : [ "fin.net_income_turn.2026-01.Q2", "fin.operating_income.2026-01.Q2" ],
+    "value" : "DIFFERENT"
   } ],
   "unavailable" : [ ],
   "doNotMention" : [ ]

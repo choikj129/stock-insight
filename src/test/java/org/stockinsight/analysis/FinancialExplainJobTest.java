@@ -27,6 +27,8 @@ import org.stockinsight.financial.FinancialService;
 import org.stockinsight.financial.RawAccountLine;
 import org.stockinsight.signal.FinancialSignalJob;
 
+import tools.jackson.databind.json.JsonMapper;
+
 /**
  * 재무 쉬운 설명 동기화 작업을 검증한다(ai-analysis.md §6.1). 실제 LLM 대신 {@link FakeLlmClient}를 쓴다.
  */
@@ -101,21 +103,35 @@ class FinancialExplainJobTest {
 
     @Test
     void retriesOnceThenSucceedsAfterValidationFailure() {
-        // 1차: 금지 표현(투자 권유)으로 검증 실패, 2차: 통과.
+        // 1차: 개요는 배정된 사실을 완전하게 쓰되(D-57), 금지 표현(투자 권유)으로 검증 실패. 2차: 통과.
         llm.thenReturn(new LlmResult(
-                        "{\"overview\":\"매수 추천 문구가 있어요.\",\"sales_profit\":\"매출과 영업이익 흐름을 살펴봤어요.\",\"structure\":\"재무 구조를 확인했어요.\",\"history\":null}",
+                        "{\"overview\":\"매출이 전년 같은 분기보다 {fin.revenue_yoy.2026-01.Q1} 늘어 매수 추천 문구가 있어요.\","
+                                + "\"sales_profit\":\"매출과 영업이익 흐름을 살펴봤어요.\",\"structure\":\"재무 구조를 확인했어요.\",\"history\":null}",
                         "claude-sonnet-5", 100, 50, 0, BigDecimal.ONE))
                 .thenReturn(validResult());
 
         FinancialExplainJob.Result result = job.run();
 
         assertThat(llm.callCount()).isEqualTo(2);
-        assertThat(llm.calls().get(1).userInput()).contains("9");
+        assertThat(llm.calls().get(0).userInput()).doesNotContain("이전 시도");
+        // 재시도는 검증기 번호가 아니라 프롬프트가 아는 표현으로 위반 내용을 알려 준다(D-53).
+        assertThat(llm.calls().get(1).userInput())
+                .contains(FinancialExplainPrompt.retryGuidance("9"))
+                .doesNotContain("규칙 번호를 위반");
         Analysis current = analysisService.findCurrent(TargetType.COMPANY, String.valueOf(companyId), AnalysisKind.FINANCIAL_EXPLAIN)
                 .orElseThrow();
         assertThat(current.status()).isEqualTo(AnalysisStatus.PUBLISHED);
         assertThat(current.attemptCount()).isEqualTo(2);
         assertThat(result.status()).isEqualTo(RunStatus.SUCCEEDED);
+
+        AnalysisAttempt[] attempts = savedAttempts();
+        assertThat(attempts).hasSize(2);
+        assertThat(attempts[0].outcome()).isEqualTo(AnalysisAttempt.Outcome.REJECTED);
+        assertThat(attempts[0].failedRules()).containsExactly("9");
+        assertThat(attempts[0].output().overview()).contains("매수");
+        assertThat(attempts[0].validatorVersion()).isEqualTo(FinancialExplainValidator.VERSION);
+        assertThat(attempts[1].outcome()).isEqualTo(AnalysisAttempt.Outcome.SUCCESS);
+        assertThat(attempts[1].failedRules()).isEmpty();
     }
 
     @Test
@@ -134,6 +150,15 @@ class FinancialExplainJobTest {
         assertThat(attempts.get(0).attemptCount()).isEqualTo(2);
         assertThat(attempts.get(0).failureReasons()).contains("9");
         assertThat(analysisService.findCurrent(TargetType.COMPANY, String.valueOf(companyId), AnalysisKind.FINANCIAL_EXPLAIN)).isEmpty();
+
+        // 거절돼도 게시용 결과(result_json)는 비우고, 시도별 원문은 attempts에만 남긴다.
+        assertThat(attempts.get(0).resultJson()).isNull();
+        AnalysisAttempt[] saved = savedAttempts();
+        assertThat(saved).hasSize(2);
+        assertThat(saved).allSatisfy(a -> {
+            assertThat(a.outcome()).isEqualTo(AnalysisAttempt.Outcome.REJECTED);
+            assertThat(a.output().overview()).contains("매수");
+        });
     }
 
     @Test
@@ -147,6 +172,13 @@ class FinancialExplainJobTest {
         Analysis saved = analysisService.findByTarget(TargetType.COMPANY, String.valueOf(companyId), AnalysisKind.FINANCIAL_EXPLAIN).get(0);
         assertThat(saved.status()).isEqualTo(AnalysisStatus.REJECTED);
         assertThat(saved.failureReasons()).contains("INVALID_JSON");
+
+        AnalysisAttempt[] attempts = savedAttempts();
+        assertThat(attempts[0].outcome()).isEqualTo(AnalysisAttempt.Outcome.INVALID_JSON);
+        assertThat(attempts[0].output()).isNull();
+        assertThat(attempts[0].rawOutput()).isEqualTo("이건 JSON이 아니다");
+        assertThat(attempts[0].validatorVersion()).isNull();
+        assertThat(attempts[1].rawOutput()).isEqualTo("여전히 JSON이 아니다");
     }
 
     @Test
@@ -160,6 +192,11 @@ class FinancialExplainJobTest {
         assertThat(saved.status()).isEqualTo(AnalysisStatus.FAILED);
         assertThat(saved.attemptCount()).isEqualTo(1);
         assertThat(result.status()).isEqualTo(RunStatus.PARTIAL);
+
+        AnalysisAttempt[] attempts = savedAttempts();
+        assertThat(attempts).hasSize(1);
+        assertThat(attempts[0].outcome()).isEqualTo(AnalysisAttempt.Outcome.CALL_FAILED);
+        assertThat(attempts[0].detail()).isEqualTo("LlmException");
     }
 
     @Test
@@ -176,6 +213,11 @@ class FinancialExplainJobTest {
         assertThat(current.status()).isEqualTo(AnalysisStatus.PUBLISHED);
         // 잘린 응답도 과금되었으므로 두 시도의 비용이 모두 누적된다.
         assertThat(current.costUsd()).isGreaterThan(BigDecimal.TEN);
+
+        AnalysisAttempt[] attempts = savedAttempts();
+        assertThat(attempts[0].outcome()).isEqualTo(AnalysisAttempt.Outcome.LLM_OUTPUT_REJECTED);
+        assertThat(attempts[0].detail()).contains("MAX_TOKENS");
+        assertThat(attempts[1].outcome()).isEqualTo(AnalysisAttempt.Outcome.SUCCESS);
     }
 
     @Test
@@ -186,15 +228,25 @@ class FinancialExplainJobTest {
         NewAnalysis draft = new NewAnalysis(TargetType.COMPANY, String.valueOf(companyId), AnalysisKind.FINANCIAL_EXPLAIN,
                 built.fingerprint(), AnalysisStatus.DRAFT, null, built.input(), built.snapshot(), "fx-schema-1", "fx-v1",
                 "claude-sonnet-5", FinancialExplainInputBuilder.INPUT_BUILDER_VERSION, "fin-1", 100, 50, 0, BigDecimal.ONE,
-                null, 1);
+                null, 1, null);
         analysisService.save(draft, java.time.Instant.now());
 
         assertThat(analysisService.findCurrent(TargetType.COMPANY, String.valueOf(companyId), AnalysisKind.FINANCIAL_EXPLAIN)).isEmpty();
     }
 
+    private AnalysisAttempt[] savedAttempts() {
+        String json = jdbc.sql("select attempts::text from analysis where target_key = :key")
+                .param("key", String.valueOf(companyId))
+                .query(String.class)
+                .single();
+        return JsonMapper.builder().build().readValue(json, AnalysisAttempt[].class);
+    }
+
     private LlmResult validResult() {
+        // seedQuarter(2.0B/1.5B, +33.3%)는 CHANGED다. 개요는 배정된 revenue_yoy를 완전성 규칙대로 써야 한다(D-57).
         return new LlmResult(
-                "{\"overview\":\"이번 보고서 기준의 상황을 정리했어요.\",\"sales_profit\":\"매출과 영업이익 흐름을 살펴봤어요.\",\"structure\":\"재무 구조를 확인했어요.\",\"history\":null}",
+                "{\"overview\":\"매출이 전년 같은 분기보다 {fin.revenue_yoy.2026-01.Q1} 늘었어요.\","
+                        + "\"sales_profit\":\"매출은 {fin.revenue.2026-01.Q1}이었어요.\",\"structure\":\"부채비율은 {fin.debt_ratio.2026-01.Q1}예요.\",\"history\":null}",
                 "claude-sonnet-5", 3000, 400, 1200, new BigDecimal("0.01"));
     }
 

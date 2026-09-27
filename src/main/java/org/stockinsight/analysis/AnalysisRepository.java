@@ -29,12 +29,12 @@ class AnalysisRepository {
                             (target_type, target_key, analysis_kind, fingerprint, status, result_json, input_json,
                              value_snapshot, schema_version, prompt_version, model, input_builder_version, rule_version,
                              input_tokens, output_tokens, cache_read_tokens, cost_usd, failure_reasons, attempt_count,
-                             created_at, is_current)
+                             attempts, created_at, is_current)
                         values (:targetType, :targetKey, :analysisKind, :fingerprint, :status,
                                 cast(:resultJson as jsonb), cast(:inputJson as jsonb), cast(:valueSnapshot as jsonb),
                                 :schemaVersion, :promptVersion, :model, :inputBuilderVersion, :ruleVersion,
                                 :inputTokens, :outputTokens, :cacheReadTokens, :costUsd, cast(:failureReasons as jsonb),
-                                :attemptCount, :now, false)
+                                :attemptCount, cast(:attempts as jsonb), :now, false)
                         returning id
                         """)
                 .param("targetType", draft.targetType().name())
@@ -56,6 +56,7 @@ class AnalysisRepository {
                 .param("costUsd", draft.costUsd())
                 .param("failureReasons", draft.failureReasons() == null ? null : toJson(draft.failureReasons()))
                 .param("attemptCount", draft.attemptCount())
+                .param("attempts", draft.attempts() == null ? null : toJson(draft.attempts()))
                 .param("now", Timestamp.from(now))
                 .query(Long.class)
                 .single();

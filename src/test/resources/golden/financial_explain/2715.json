@@ -14,69 +14,35 @@
   "sections" : [ "overview", "sales_profit", "history" ],
   "periods" : [ {
     "key" : "2026-01.Q2",
-    "label" : "2026년 2분기"
+    "kind" : "QUARTER"
   }, {
     "key" : "2025-01.Q4",
-    "label" : "2025년(연간)"
+    "kind" : "ANNUAL"
+  }, {
+    "key" : "2025-01.Q3",
+    "kind" : "QUARTER"
+  }, {
+    "key" : "2025-01.Q2",
+    "kind" : "QUARTER"
   } ],
   "facts" : [ {
     "key" : "fin.operating_income.2026-01.Q2",
     "name" : "영업이익",
-    "display" : "-4.5억원",
     "sign" : "-",
     "period" : "2026-01.Q2"
   }, {
     "key" : "fin.operating_income_prior.2026-01.Q2",
     "name" : "영업이익(전년 동기)",
-    "display" : "-28.4억원",
     "sign" : "-",
     "period" : "2026-01.Q2"
-  }, {
-    "key" : "fin.net_income.2026-01.Q2",
-    "name" : "당기순이익",
-    "display" : "-4.4억원",
-    "sign" : "-",
-    "period" : "2026-01.Q2"
-  }, {
-    "key" : "fin.net_income_prior.2026-01.Q2",
-    "name" : "당기순이익(전년 동기)",
-    "display" : "-5.2억원",
-    "sign" : "-",
-    "period" : "2026-01.Q2"
-  }, {
-    "key" : "fin.revenue.2025-01.Q4",
-    "name" : "매출액",
-    "display" : "20.1억원",
-    "sign" : "+",
-    "period" : "2025-01.Q4"
-  }, {
-    "key" : "fin.revenue_yoy.2025-01.Q4",
-    "name" : "매출 증가율(전기 대비)",
-    "display" : "-76.4%",
-    "sign" : "-",
-    "period" : "2025-01.Q4"
   }, {
     "key" : "fin.operating_income.2025-01.Q4",
     "name" : "영업이익",
-    "display" : "-77.6억원",
-    "sign" : "-",
-    "period" : "2025-01.Q4"
-  }, {
-    "key" : "fin.operating_margin.2025-01.Q4",
-    "name" : "영업이익률",
-    "display" : "-386.5%",
-    "sign" : "-",
-    "period" : "2025-01.Q4"
-  }, {
-    "key" : "fin.net_income.2025-01.Q4",
-    "name" : "당기순이익",
-    "display" : "-117.7억원",
     "sign" : "-",
     "period" : "2025-01.Q4"
   }, {
     "key" : "fin.operating_loss_run.2026-01.Q2",
     "name" : "연속 영업적자 분기 수",
-    "display" : "2분기",
     "sign" : "+",
     "period" : "2026-01.Q2"
   } ],
@@ -88,8 +54,9 @@
     "direction" : "NEGATIVE",
     "severity" : "HIGH",
     "period" : "2025-01.Q4",
+    "section" : "history",
     "persistence" : null,
-    "factKeys" : [ "fin.revenue.2025-01.Q4", "fin.revenue_yoy.2025-01.Q4" ]
+    "factKeys" : [ ]
   }, {
     "ref" : "S2",
     "type" : "FIN_OPERATING_MARGIN_CHANGE",
@@ -98,6 +65,7 @@
     "direction" : "POSITIVE",
     "severity" : "HIGH",
     "period" : "2025-01.Q3",
+    "section" : "history",
     "persistence" : null,
     "factKeys" : [ ]
   }, {
@@ -108,6 +76,7 @@
     "direction" : "NEGATIVE",
     "severity" : "HIGH",
     "period" : "2025-01.Q2",
+    "section" : "history",
     "persistence" : 4,
     "factKeys" : [ ]
   }, {
@@ -118,30 +87,42 @@
     "direction" : "POSITIVE",
     "severity" : "HIGH",
     "period" : "2025-01.Q2",
+    "section" : "history",
     "persistence" : null,
     "factKeys" : [ ]
   } ],
   "groups" : [ {
+    "section" : "history",
     "period" : "2025-01.Q4",
     "topic" : "SALES_PROFIT",
     "refs" : [ "S1" ],
     "mixedDirection" : false
   }, {
+    "section" : "history",
     "period" : "2025-01.Q3",
     "topic" : "SALES_PROFIT",
     "refs" : [ "S2" ],
     "mixedDirection" : false
   }, {
+    "section" : "history",
     "period" : "2025-01.Q2",
     "topic" : "STRUCTURE",
     "refs" : [ "S3" ],
     "mixedDirection" : false
   }, {
+    "section" : "history",
     "period" : "2025-01.Q2",
     "topic" : "SALES_PROFIT",
     "refs" : [ "S4" ],
     "mixedDirection" : false
   } ],
+  "sectionFacts" : {
+    "overview" : [ ],
+    "sales_profit" : [ "fin.operating_income.2026-01.Q2", "fin.operating_loss_run.2026-01.Q2", "fin.operating_income_prior.2026-01.Q2", "fin.operating_income.2025-01.Q4" ],
+    "structure" : [ ],
+    "history" : [ ]
+  },
+  "relations" : [ ],
   "unavailable" : [ {
     "metric" : "revenue",
     "reason" : "ACCOUNT_MISSING"
@@ -167,5 +148,5 @@
     "metric" : "impairment_ratio",
     "reason" : "INCONSISTENT_BALANCE"
   } ],
-  "doNotMention" : [ ]
+  "doNotMention" : [ "매출" ]
 }

@@ -15,7 +15,7 @@
     },
     "history": {
       "type": ["string", "null"],
-      "description": "이력 신호·흐름 설명. sections에 없으면 null."
+      "description": "이력 신호를 최근부터 과거 순서로 쓴 설명(기간 토큰과 신호 배지만). sections에 없으면 null."
     }
   },
   "required": ["overview", "sales_profit", "structure", "history"],

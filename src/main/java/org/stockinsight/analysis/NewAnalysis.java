@@ -23,5 +23,6 @@ public record NewAnalysis(
         Integer cacheReadTokens,
         BigDecimal costUsd,
         List<String> failureReasons,
-        int attemptCount) {
+        int attemptCount,
+        List<AnalysisAttempt> attempts) {
 }

@@ -14,74 +14,45 @@
   "sections" : [ "overview", "sales_profit", "structure" ],
   "periods" : [ {
     "key" : "2026-01.Q2",
-    "label" : "2026년 2분기"
+    "kind" : "QUARTER"
   }, {
     "key" : "2025-01.Q4",
-    "label" : "2025년(연간)"
+    "kind" : "ANNUAL"
   } ],
   "facts" : [ {
     "key" : "fin.operating_income.2026-01.Q2",
     "name" : "영업이익",
-    "display" : "1.2조원",
     "sign" : "+",
     "period" : "2026-01.Q2"
   }, {
     "key" : "fin.operating_income_prior.2026-01.Q2",
     "name" : "영업이익(전년 동기)",
-    "display" : "7,984.9억원",
-    "sign" : "+",
-    "period" : "2026-01.Q2"
-  }, {
-    "key" : "fin.net_income.2026-01.Q2",
-    "name" : "당기순이익",
-    "display" : "8,768.6억원",
-    "sign" : "+",
-    "period" : "2026-01.Q2"
-  }, {
-    "key" : "fin.net_income_prior.2026-01.Q2",
-    "name" : "당기순이익(전년 동기)",
-    "display" : "6,523.1억원",
     "sign" : "+",
     "period" : "2026-01.Q2"
   }, {
     "key" : "fin.operating_income.2025-01.Q4",
     "name" : "영업이익",
-    "display" : "2.4조원",
     "sign" : "+",
     "period" : "2025-01.Q4"
-  }, {
-    "key" : "fin.net_income.2025-01.Q4",
-    "name" : "당기순이익",
-    "display" : "1.8조원",
-    "sign" : "+",
-    "period" : "2025-01.Q4"
-  }, {
-    "key" : "fin.total_assets.2026-01.Q2",
-    "name" : "자산총계",
-    "display" : "81.6조원",
-    "sign" : "+",
-    "period" : "2026-01.Q2"
-  }, {
-    "key" : "fin.total_liabilities.2026-01.Q2",
-    "name" : "부채총계",
-    "display" : "67.6조원",
-    "sign" : "+",
-    "period" : "2026-01.Q2"
   }, {
     "key" : "fin.total_equity.2026-01.Q2",
     "name" : "자본총계",
-    "display" : "14.0조원",
-    "sign" : "+",
-    "period" : "2026-01.Q2"
-  }, {
-    "key" : "fin.capital_stock.2026-01.Q2",
-    "name" : "자본금",
-    "display" : "354.0억원",
     "sign" : "+",
     "period" : "2026-01.Q2"
   } ],
   "signals" : [ ],
   "groups" : [ ],
+  "sectionFacts" : {
+    "overview" : [ ],
+    "sales_profit" : [ "fin.operating_income.2026-01.Q2", "fin.operating_income_prior.2026-01.Q2", "fin.operating_income.2025-01.Q4" ],
+    "structure" : [ "fin.total_equity.2026-01.Q2" ],
+    "history" : [ ]
+  },
+  "relations" : [ {
+    "type" : "OPERATING_INCOME_DIRECTION",
+    "factKeys" : [ "fin.operating_income.2026-01.Q2", "fin.operating_income_prior.2026-01.Q2" ],
+    "value" : "UP"
+  } ],
   "unavailable" : [ {
     "metric" : "revenue",
     "reason" : "ACCOUNT_MISSING"

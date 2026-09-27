@@ -5,6 +5,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -164,6 +165,7 @@ public class FinancialExplainJob {
         long cacheReadTokens = 0;
         BigDecimal costUsd = BigDecimal.ZERO;
         int attemptCount = 0;
+        List<AnalysisAttempt> attempts = new ArrayList<>();
 
         for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
             attemptCount = attempt;
@@ -181,10 +183,14 @@ public class FinancialExplainJob {
                 }
                 priorFailedRules = List.of("LLM_OUTPUT_REJECTED");
                 outcome = Attempt.rejected(priorFailedRules);
+                attempts.add(new AnalysisAttempt(attempt, AnalysisAttempt.Outcome.LLM_OUTPUT_REJECTED, priorFailedRules,
+                        null, null, e.getMessage(), null));
                 continue;
             } catch (LlmException e) {
                 log.warn("재무 쉬운 설명 AI 호출 실패: 기업 {}: {}", companyId, e.getClass().getSimpleName());
                 outcome = Attempt.callFailed(e.getClass().getSimpleName());
+                attempts.add(new AnalysisAttempt(attempt, AnalysisAttempt.Outcome.CALL_FAILED, List.of(), null, null,
+                        e.getClass().getSimpleName(), null));
                 break;
             }
             model = result.model();
@@ -199,9 +205,14 @@ public class FinancialExplainJob {
             } catch (JacksonException e) {
                 priorFailedRules = List.of("INVALID_JSON");
                 outcome = Attempt.rejected(priorFailedRules);
+                attempts.add(new AnalysisAttempt(attempt, AnalysisAttempt.Outcome.INVALID_JSON, priorFailedRules, null,
+                        result.outputJson(), null, null));
                 continue;
             }
             FinancialExplainValidator.ValidationResult vr = validator.validate(output, built.input());
+            attempts.add(new AnalysisAttempt(attempt,
+                    vr.valid() ? AnalysisAttempt.Outcome.SUCCESS : AnalysisAttempt.Outcome.REJECTED,
+                    vr.failedRules(), output, null, null, FinancialExplainValidator.VERSION));
             if (vr.valid()) {
                 outcome = Attempt.success(output);
                 break;
@@ -222,7 +233,7 @@ public class FinancialExplainJob {
                 FinancialExplainPrompt.SCHEMA_VERSION, FinancialExplainPrompt.PROMPT_VERSION, model,
                 FinancialExplainInputBuilder.INPUT_BUILDER_VERSION, FinancialRuleCatalog.RULE_VERSION,
                 toIntOrNull(inputTokens), toIntOrNull(outputTokens), toIntOrNull(cacheReadTokens), costUsd,
-                outcome.failedRules(), attemptCount);
+                outcome.failedRules(), attemptCount, attempts);
         long id = analysisService.save(draft, now);
 
         switch (outcome.kind()) {
