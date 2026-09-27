@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
- * 골든셋 입력 JSON을 로컬 DB에서 만들어 저장소에 고정한다(ai-analysis.md §4.4.8, §8). AI를 호출하지 않는다(무료·안전).
+ * 골든셋 입력 JSON을 로컬 DB에서 만들어 저장소에 고정한다(docs/spec/financial-explain.md §4.4.8, §8). AI를 호출하지 않는다(무료·안전).
  * {@code --spring.profiles.active=local,goldenset} 로 기동할 때만 동작한다. 대상은
  * {@code app.analysis.financial-explain.golden-set-company-ids}에 설정된 기업 ID뿐이다(ai_covered로 임의로
  * 넓히지 않는다). 산출물은 {@code src/test/resources/golden/financial_explain/{companyId}.json}에 쓴다.

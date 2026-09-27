@@ -20,7 +20,7 @@ import org.stockinsight.financial.QuarterEntry;
 import org.stockinsight.financial.SummaryFlag;
 
 /**
- * 재무 요약에서 신호 초안을 계산한다(D-35, ai-analysis.md §3.7). DB 없이 동작하는 순수 계산이다.
+ * 재무 요약에서 신호 초안을 계산한다(D-35, docs/spec/signals-financial.md §3.7). DB 없이 동작하는 순수 계산이다.
  * 판정 단위는 재무 기간 하나(보고서 하나)이고, 대상은 시계열 기준의 최근 12분기와 3개 사업연도다.
  */
 public final class FinancialSignalCalculator {

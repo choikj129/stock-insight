@@ -1,4 +1,4 @@
--- 재무 데이터: OpenDART 다중회사 주요계정(fnlttMultiAcnt) (docs/implementation-plan.md §4.2, D-32, D-33)
+-- 재무 데이터: OpenDART 다중회사 주요계정(fnlttMultiAcnt) (docs/work/3-collection-signals.md §4.2, D-32, D-33)
 
 create table financial_report (
     id                 bigint generated always as identity primary key,

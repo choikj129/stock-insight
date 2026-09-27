@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.stockinsight.financial.PeriodKey;
 
 /**
- * 금액 표시 형식의 경계를 검증한다(D-41, implementation-plan.md §8.5). 통화와 관계없이 한국어 수 단위(조·억·만)로
+ * 금액 표시 형식의 경계를 검증한다(D-41, docs/work/3-4-financial-explain.md §8.5). 통화와 관계없이 한국어 수 단위(조·억·만)로
  * 줄이고 통화명을 붙이며, 환산하지 않는다.
  */
 class PeriodLabelsTest {

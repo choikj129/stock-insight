@@ -7,7 +7,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 /**
- * 재무 쉬운 설명 검증기의 경계값을 확인한다(ai-analysis.md §4.4.7, §7).
+ * 재무 쉬운 설명 검증기의 경계값을 확인한다(docs/spec/financial-explain.md §4.4.7, §7).
  */
 class FinancialExplainValidatorTest {
 
@@ -546,7 +546,7 @@ class FinancialExplainValidatorTest {
 
     @Test
     void rule6FailsWhenChangeFactIsWrittenAsLevel() {
-        // D-46 예시 "영업이익률은 {…_diff} 수준이에요"(608·1640 통과본, implementation-plan.md §7.4.21 E): 증감 어휘가
+        // D-46 예시 "영업이익률은 {…_diff} 수준이에요"(608·1640 통과본, docs/work/3-4-verification-1.md §7.4.21 E): 증감 어휘가
         // 없어 부호와 대조할 말이 없던 문장. D-54 뒤로 변화량 토큰에는 같은 부호의 증감 어휘가 필요하다.
         // (참고: "매출 증가율은 {…}예요"는 사실 이름의 "증가"가 증감 어휘로 세어져 통과한다 — 증가율을 값으로 말하는
         // 것은 사실과 맞는 문장이라 막을 대상이 아니다. 문제는 수준 지표 이름에 변화량을 붙이는 경우다.)
@@ -715,7 +715,7 @@ class FinancialExplainValidatorTest {
         assertThat(validator.validate(out, input).failedRules()).contains("10");
     }
 
-    // ---- D-55: 관계 서술 계약 (implementation-plan.md §7.4.26·§7.4.27 점검표 8~13, 23, 24) ----
+    // ---- D-55: 관계 서술 계약 (docs/work/3-4-verification-2.md §7.4.26·§7.4.27 점검표 8~13, 23, 24) ----
 
     private static final String Q2 = "2026-01.Q2";
     private static final FinancialExplainInput.Fact OPERATING_INCOME_PRIOR = new FinancialExplainInput.Fact(

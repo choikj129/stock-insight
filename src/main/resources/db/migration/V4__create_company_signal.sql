@@ -1,4 +1,4 @@
--- 기업 신호 (docs/implementation-plan.md §6, D-35, D-36, D-37)
+-- 기업 신호 (docs/work/3-collection-signals.md §6, D-35, D-36, D-37)
 
 create table company_signal (
     id                 bigint generated always as identity primary key,

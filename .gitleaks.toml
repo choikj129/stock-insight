@@ -1,5 +1,5 @@
 # gitleaks 설정. 기본 규칙을 모두 쓰고, 기본 규칙에 없는 규칙을 더하고, 확인된 오탐만 좁게 허용한다.
-# CI(gitleaks-action@v3)는 gitleaks 8.24.3으로 이 파일을 자동으로 읽는다. 검증 방법은 docs/code-guide.md §14.
+# CI(gitleaks-action@v3)는 gitleaks 8.24.3으로 이 파일을 자동으로 읽는다. 검증 방법은 docs/code-guide/README.md §14.
 title = "stock-insight gitleaks config"
 
 [extend]

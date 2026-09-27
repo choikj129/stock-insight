@@ -17,7 +17,7 @@ import org.stockinsight.financial.QuarterEntry;
 import org.stockinsight.financial.SummaryFlag;
 
 /**
- * 재무 신호 판정의 문턱값 경계를 검증한다(D-35, ai-analysis.md §3.7). 값은 implementation-plan.md §6.1의 실제 분포로 정했다.
+ * 재무 신호 판정의 문턱값 경계를 검증한다(D-35, docs/spec/signals-financial.md §3.7). 값은 docs/work/3-collection-signals.md §6.1의 실제 분포로 정했다.
  */
 class FinancialSignalCalculatorTest {
 
@@ -239,7 +239,7 @@ class FinancialSignalCalculatorTest {
         assertThat(signals.get(0).persistence()).isEqualTo(4);
     }
 
-    // ---- 변화 신호의 지속 (ai-analysis.md §3.7, D-61) ----
+    // ---- 변화 신호의 지속 (docs/spec/signals-financial.md §3.7, D-61) ----
 
     @Test
     void revenuePersistenceCountsSameSignQuartersBackAndStopsAtDerivedQ4() {

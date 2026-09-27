@@ -14,7 +14,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
-/** 상장 종목. 기업과 분리해 우선주·해외 상장에 대비한다 (docs/decisions.md D-18). */
+/** 상장 종목. 기업과 분리해 우선주·해외 상장에 대비한다 (D-18). */
 @Entity
 @Table(name = "security")
 public class Security {

@@ -1,7 +1,7 @@
 package org.stockinsight.financial;
 
 /**
- * 데이터 한계 사유 코드와 해당 기간(ai-analysis.md §3.8). periodKey가 없으면(null) 기업 전체에 대한 플래그다.
+ * 데이터 한계 사유 코드와 해당 기간(docs/spec/signals-financial.md §3.8). periodKey가 없으면(null) 기업 전체에 대한 플래그다.
  */
 public record SummaryFlag(String code, String periodKey) {
 

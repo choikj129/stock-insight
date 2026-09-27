@@ -9,7 +9,7 @@ import java.util.Map;
 import org.stockinsight.financial.PeriodKey;
 
 /**
- * 기간 라벨과 값 표시 형식(코드가 만든다, ai-analysis.md §4.4.2). AI는 이 라벨을 {@code {per.*}} 토큰으로만 쓴다.
+ * 기간 라벨과 값 표시 형식(코드가 만든다, docs/spec/financial-explain.md §4.4.2). AI는 이 라벨을 {@code {per.*}} 토큰으로만 쓴다.
  */
 final class PeriodLabels {
 
@@ -34,7 +34,7 @@ final class PeriodLabels {
     /**
      * 12월 결산이고 12개월짜리 회계연도면 "2025년(연간)", 그 밖의 12개월짜리는 "2025.04~2026.03 회계연도".
      * 12개월이 아닌 회계연도(결산기 변경 등, D-59)는 실제 시작~끝 달로 "2025.11~12 회계연도"처럼 쓴다 — "(연간)"이라고
-     * 하면 12개월 치인 것처럼 읽힌다(2386 사례, implementation-plan.md §7.4.33).
+     * 하면 12개월 치인 것처럼 읽힌다(2386 사례, docs/work/3-4-verification-2.md §7.4.33).
      */
     static String ofAnnual(LocalDate fiscalYearStart, LocalDate periodEnd, Integer fiscalMonth) {
         boolean irregular = periodEnd != null

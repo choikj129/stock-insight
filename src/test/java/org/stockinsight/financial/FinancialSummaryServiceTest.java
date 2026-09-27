@@ -16,7 +16,7 @@ import org.stockinsight.company.CompanyService;
 import org.stockinsight.company.CompanyService.ListedCompany;
 import org.stockinsight.company.Market;
 
-/** 재무 요약 구성을 검증한다(D-37, ai-analysis.md §3.6). */
+/** 재무 요약 구성을 검증한다(D-37, docs/spec/signals-financial.md §3.6). */
 @SpringBootTest
 @Import(TestcontainersConfiguration.class)
 class FinancialSummaryServiceTest {

@@ -31,7 +31,7 @@ import org.stockinsight.signal.SignalStatus;
 import org.stockinsight.signal.SignalType;
 
 /**
- * 재무 쉬운 설명의 AI 입력을 만든다(ai-analysis.md §4.4.2, D-38). 같은 데이터면 항상 같은 결과를 만든다(결정적 입력).
+ * 재무 쉬운 설명의 AI 입력을 만든다(docs/spec/financial-explain.md §4.4.2, D-38). 같은 데이터면 항상 같은 결과를 만든다(결정적 입력).
  * 원천 행·분기 시계열 전체·공시번호·내부 ID는 결과에 넣지 않는다.
  */
 @Service
@@ -63,7 +63,7 @@ public class FinancialExplainInputBuilder {
     static final String HISTORY = "history";
 
     /**
-     * 신호 유형 → 근거 사실 키(기본 이름). ai-analysis.md §4.4.2 "신호 선별과 묶음". 부채비율 급등·자본잠식은 D-54의
+     * 신호 유형 → 근거 사실 키(기본 이름). docs/spec/financial-explain.md §4.4.2 "신호 선별과 묶음". 부채비율 급등·자본잠식은 D-54의
      * {@code structure} 구성에 맞춰 전기말 부채비율·잠식률을 뺐다. 매출·영업이익률의 전년 원값은 변화량과 같은 정보라
      * 빼고, 흑자·적자 전환은 전년 영업이익 대신 전환 사실 하나다(D-54 보완·D-55). 배정되지 않은 키는 입력에서 걸러진다.
      */
@@ -107,7 +107,7 @@ public class FinancialExplainInputBuilder {
         this.signalService = signalService;
     }
 
-    /** 재무 보고서가 없는 기업은 빈 값이다(ai-analysis.md §4.4.6). */
+    /** 재무 보고서가 없는 기업은 빈 값이다(docs/spec/financial-explain.md §4.4.6). */
     @Transactional(readOnly = true)
     public Optional<BuildResult> build(long companyId) {
         FinancialSummary summary = summaryService.summarize(companyId);
@@ -185,7 +185,7 @@ public class FinancialExplainInputBuilder {
         List<FinancialExplainInput.Group> groups = buildGroups(selection.ordered(), refByOriginal, periodByOriginal);
         String changeStatus = selection.hasActiveChange() ? "CHANGED" : "NONE";
         // 최근 사업연도 사실(우선순위 7)은 12개월짜리 회계연도에서만 뽑는다(D-59). 12개월이 아니면(결산기 변경 등)
-        // "최근 사업연도 영업이익은 …였어요"가 1년 치처럼 읽힌다(2386 사례, implementation-plan.md §7.4.33).
+        // "최근 사업연도 영업이익은 …였어요"가 1년 치처럼 읽힌다(2386 사례, docs/work/3-4-verification-2.md §7.4.33).
         PeriodKey latestAnnualKey = latest.isAnnual || summary.annual().isEmpty() || summary.annual().get(0).irregular() ? null
                 : annualKey(summary.annual().get(0).fiscalYearStart());
         Assignment assignment = assignSectionFacts(changeStatus, groups, signalRefs, fc,
@@ -656,7 +656,7 @@ public class FinancialExplainInputBuilder {
                 unavailable.add(new FinancialExplainInput.Unavailable("revenue", "ACCOUNT_MISSING"));
                 // 금융형은 이미 생성자에서 "매출"을 doNotMention에 넣지만(형식 때문에), 일반형인데 계정 자체가
                 // 없는 경우는 그 신호가 없었다 — unavailable만으로는 "매출" 언급을 막는 힘이 약해(§7.4.9,
-                // implementation-plan.md) doNotMention에도 명시적으로 넣는다. Set이라 중복 추가는 안전하다.
+                // docs/work/3-4-verification-1.md) doNotMention에도 명시적으로 넣는다. Set이라 중복 추가는 안전하다.
                 doNotMention.add("매출");
             }
 
@@ -723,7 +723,7 @@ public class FinancialExplainInputBuilder {
         /**
          * 상태·전환 사실. AI 입력에는 사실 이름·부호만 준다(D-59) — 표시 값(닫힌 문구)은 AI가 보지 않아도 된다.
          * 전환·상태 문장의 서술어("돌아섰어요" 등)는 값과 무관하게 성립하는 고정 문형이기 때문이다(구현 중 정정,
-         * decisions.md D-59 "구현 중 정정" 참고). 값 스냅샷에는 렌더링용 닫힌 문구와 부호의 근거인 원값을 담는다.
+         * D-59 "구현 중 정정" 참고). 값 스냅샷에는 렌더링용 닫힌 문구와 부호의 근거인 원값을 담는다.
          */
         private void putState(PeriodKey period, String metric, String name, String display, BigDecimal basisValue,
                 String receiptNo, LocalDate periodEnd) {
@@ -810,7 +810,7 @@ public class FinancialExplainInputBuilder {
                     putStructure(period, "debt_ratio", "부채비율", debtRatio, "%", receiptNo, periodEnd);
                     if (debtRatioPrior != null) {
                         // "(전기말 대비)"는 프롬프트가 쓰는 "지난 회계연도 말"과 말이 달랐다(D-59, 2386의 "변화했어요"에
-                        // 거든 것으로 보이는 원인 중 하나, implementation-plan.md §7.4.33).
+                        // 거든 것으로 보이는 원인 중 하나, docs/work/3-4-verification-2.md §7.4.33).
                         BigDecimal debtRatioDiff = debtRatio.subtract(debtRatioPrior);
                         putStructure(period, "debt_ratio_diff",
                                 directionalName("부채비율", "상승폭", "하락폭", debtRatioDiff) + "(지난 회계연도 말 대비)",

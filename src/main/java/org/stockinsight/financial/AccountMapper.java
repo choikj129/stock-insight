@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 계정명 → 지표 키 매핑과 재무제표 형식 판별 (ai-analysis.md §3.5).
+ * 계정명 → 지표 키 매핑과 재무제표 형식 판별 (docs/spec/signals-financial.md §3.5).
  * 값은 원천 그대로 두고(D-32) 여기서 읽을 때만 해석한다.
  */
 final class AccountMapper {

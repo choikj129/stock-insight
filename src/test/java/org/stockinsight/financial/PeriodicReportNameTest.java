@@ -38,7 +38,7 @@ class PeriodicReportNameTest {
 
     @Test
     void quarterlyReportForJuneFiscalYearEnd() {
-        // 실제 사례: 6월 결산 양지사의 3분기보고서는 bsns_year=2026, 기간 2025.07~2026.03 (docs/implementation-plan.md §4.1)
+        // 실제 사례: 6월 결산 양지사의 3분기보고서는 bsns_year=2026, 기간 2025.07~2026.03 (docs/work/3-collection-signals.md §4.1)
         assertThat(PeriodicReportName.resolve("분기보고서 (2026.09)", 6).orElseThrow().periodType())
                 .isEqualTo(PeriodType.Q1);
         QueryKey q3 = PeriodicReportName.resolve("분기보고서 (2026.03)", 6).orElseThrow();

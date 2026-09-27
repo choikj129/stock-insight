@@ -3,7 +3,7 @@ package org.stockinsight.analysis;
 import java.util.Map;
 
 /**
- * 정적 콘텐츠: 신호 유형별 배지 이름, 데이터 한계 문구, 면책·AI 생성 표시(ai-analysis.md §7.2, §10).
+ * 정적 콘텐츠: 신호 유형별 배지 이름, 데이터 한계 문구, 면책·AI 생성 표시(docs/spec/analyses.md §7.2, §10).
  * 코드 상수로 관리한다. AI는 이 문구를 만들지 않는다.
  */
 final class StaticContent {
@@ -26,7 +26,7 @@ final class StaticContent {
             "FIN_OPERATING_LOSS_STREAK", "영업적자 지속",
             "FIN_CAPITAL_IMPAIRMENT", "자본잠식");
 
-    /** 신호 유형·방향의 정적 배지 이름(ai-analysis.md §4.4.4). */
+    /** 신호 유형·방향의 정적 배지 이름(docs/spec/financial-explain.md §4.4.4). */
     static String badgeName(String signalType, String direction) {
         Map<String, String> table = "POSITIVE".equals(direction) ? BADGE_POSITIVE : BADGE_NEGATIVE;
         return table.getOrDefault(signalType, table.getOrDefault(signalType, signalType));

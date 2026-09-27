@@ -18,7 +18,7 @@ import org.stockinsight.signal.CompanySignalService;
 import org.stockinsight.signal.SignalStatus;
 
 /**
- * 게시용 조립(화면 전 단계, ai-analysis.md §4.4.5). 토큰을 값 스냅샷으로 바꾸고 이스케이프하며, 게시본이 참조한
+ * 게시용 조립(화면 전 단계, docs/spec/financial-explain.md §4.4.5). 토큰을 값 스냅샷으로 바꾸고 이스케이프하며, 게시본이 참조한
  * 신호·보고서가 최신 데이터와 달라졌는지(무효화, D-42) 판단한다. 화면(Thymeleaf)은 아직 없다.
  */
 @Service

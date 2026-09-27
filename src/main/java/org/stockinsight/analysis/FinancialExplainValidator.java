@@ -11,7 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * 재무 쉬운 설명 출력을 검증한다(ai-analysis.md §4.4.7, §7). 실패하면 규칙 번호 목록을 돌려준다.
+ * 재무 쉬운 설명 출력을 검증한다(docs/spec/financial-explain.md §4.4.7, §7). 실패하면 규칙 번호 목록을 돌려준다.
  * DB·외부 호출 없는 순수 계산이라 단위 테스트 대상이다. 판정은 입력(사실 부호·신호 방향·관계 항목)만 보고 한다 —
  * 관계의 방향을 표시 문자열에서 다시 계산하지 않는다(D-55).
  */
@@ -28,7 +28,7 @@ public final class FinancialExplainValidator {
      * fxv-6(D-56): 규칙 14(배지 위치)를 더하고, 규칙 7에 "흐름 사실 문장에는 기간 토큰을 쓰지 않는다"를 더했다.
      * fxv-7(D-57): 규칙 11에 개요 완전성을 더했다 — {@code overview}는 배정된 사실을 모두 써야 한다(배정 밖 금지는 그대로).
      * {@code sales_profit}·{@code structure}는 완전성을 요구하지 않는다.
-     * fxv-8(D-58, fx-v12 사람 검토 반영·implementation-plan.md §7.4.33): 규칙 14가 앞머리 배지 뒤 같은 절의 첫 사실
+     * fxv-8(D-58, fx-v12 사람 검토 반영·docs/work/3-4-verification-2.md §7.4.33): 규칙 14가 앞머리 배지 뒤 같은 절의 첫 사실
      * 토큰이 그 신호의 지표 묶음인지도 본다(배지·지표 결합). 규칙 13이 서로 다른 지표를 "(으)로"로 잇는 것과 정도를
      * 줄이는 어휘(조금·약간·살짝)를 더 막는다. 규칙 6은 부호가 다른 변화량 토큰이 한 문장에 섞이면 절 단위로도 본다.
      * 규칙 5에 정도 어휘(많이·상당히·꽤)를 더한다.
@@ -115,7 +115,7 @@ public final class FinancialExplainValidator {
     /** 규칙 7 확장: 시간 관계 어휘는 history에서만(D-55 R8). */
     private static final Set<String> TIME_WORDS = Set.of("앞선", "앞서", "이전", "이후");
 
-    /** ai-analysis.md §7.2 + §4.4.7 규칙 9의 추가 목록. */
+    /** docs/spec/analyses.md §7.2 + §4.4.7 규칙 9의 추가 목록. */
     private static final Map<String, Set<String>> FORBIDDEN = Map.ofEntries(
             Map.entry("투자 행위 권유", Set.of("매수", "매도", "추천", "비중 확대", "담아")),
             Map.entry("가격 예측", Set.of("목표가", "적정 주가", "상승 여력")),
@@ -370,7 +370,7 @@ public final class FinancialExplainValidator {
      * 어휘가 있어야 한다(D-54, 부호가 섞이면 두 방향 모두). 평가어는 방향이 맞는 신호가 같은 문장에 있을 때만 쓴다.
      * 변화량 토큰의 부호가 한 문장에서 갈리면(D-58, 개요 2사실 등) 문장 전체가 아니라 절 단위로도 본다 — 그렇지 않으면
      * "매출은 …줄었지만 영업이익률은 …높아졌어요"에서 두 어휘가 서로 바뀌어도(늘다·낮아지다 자리를 바꿔도) 문장 전체
-     * 기준으로는 두 어휘가 다 있어 통과해 버린다(820, implementation-plan.md §7.4.33).
+     * 기준으로는 두 어휘가 다 있어 통과해 버린다(820, docs/work/3-4-verification-2.md §7.4.33).
      */
     private static void checkDirection(String sentence, String words, List<TokenRef> tokens, Context ctx, Set<String> failedRules) {
         boolean increase = containsAny(words, INCREASE_WORDS);

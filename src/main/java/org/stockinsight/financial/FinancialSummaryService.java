@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 import org.stockinsight.financial.AccountMapper.MappedAccounts;
 
 /**
- * 기업 재무 요약을 만든다(ai-analysis.md §3.5~§3.8). 시계열 기준(연결/별도)·통화는 최신 기간 기준으로 고정한다(D-37).
+ * 기업 재무 요약을 만든다(docs/spec/signals-financial.md §3.5~§3.8). 시계열 기준(연결/별도)·통화는 최신 기간 기준으로 고정한다(D-37).
  * 계산만 하고 저장하지 않는다.
  */
 @Service
@@ -101,7 +101,7 @@ public class FinancialSummaryService {
                 accounts.capitalStock()));
     }
 
-    /** 4분기 = 연간 − 3분기 누적(사업보고서와 3분기 보고서의 기준·통화·회계연도 시작일이 같을 때만, ai-analysis.md §3.6). */
+    /** 4분기 = 연간 − 3분기 누적(사업보고서와 3분기 보고서의 기준·통화·회계연도 시작일이 같을 때만, docs/spec/signals-financial.md §3.6). */
     private QuarterEntry deriveFourthQuarter(PeriodKey key, StoredFinancialReport fy, StoredFinancialReport q3) {
         MappedAccounts fyAccounts = AccountMapper.map(fy.lines(), "company=" + fy.companyId() + " " + key.stateBasisKey());
         boolean canDerive = q3 != null && q3.currency().equals(fy.currency()) && q3.fiscalYearStart().equals(fy.fiscalYearStart());
@@ -195,7 +195,7 @@ public class FinancialSummaryService {
         return flags;
     }
 
-    /** 자산총계 = 부채총계 + 자본총계 (차이 0.5% 이내, ai-analysis.md §3.6). 값이 없으면 점검하지 않는다(일치로 본다). */
+    /** 자산총계 = 부채총계 + 자본총계 (차이 0.5% 이내, docs/spec/signals-financial.md §3.6). 값이 없으면 점검하지 않는다(일치로 본다). */
     private static boolean isBalanceConsistent(MappedAccounts accounts) {
         return FinancialRatios.isBalanceConsistent(accounts.totalAssets().current(),
                 accounts.totalLiabilities().current(), accounts.totalEquity().current());

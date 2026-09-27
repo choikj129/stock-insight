@@ -44,7 +44,7 @@ import org.stockinsight.ingest.dart.DartKeyAccount;
 import org.stockinsight.ingest.dart.DartStatus;
 
 /**
- * 인증키 없이 가짜 OpenDART로 재무 수집 규칙을 검증한다 (docs/implementation-plan.md §4.3, §4.4).
+ * 인증키 없이 가짜 OpenDART로 재무 수집 규칙을 검증한다 (docs/work/3-collection-signals.md §4.3, §4.4).
  * 초기 적재 대상 연도를 올해 하나로 줄여(0년) 묶음 수를 작게 유지한다.
  */
 @SpringBootTest(properties = {

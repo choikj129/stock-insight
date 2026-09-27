@@ -21,7 +21,7 @@ import org.stockinsight.company.Market;
 import org.stockinsight.financial.FinancialService.ReplaceResult;
 
 /**
- * 재무 저장 규칙을 검증한다 (docs/implementation-plan.md §4.2, §4.4, D-32, D-33).
+ * 재무 저장 규칙을 검증한다 (docs/work/3-collection-signals.md §4.2, §4.4, D-32, D-33).
  * 계정 값은 실제 응답의 형태(쉼표, 음수, "-", 기간 문자열)를 따른다.
  */
 @SpringBootTest

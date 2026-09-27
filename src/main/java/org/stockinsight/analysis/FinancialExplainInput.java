@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 재무 쉬운 설명의 AI 입력 전체(ai-analysis.md §4.4.2, D-38). 코드가 만든 사실표와 신호 참조뿐이고,
+ * 재무 쉬운 설명의 AI 입력 전체(docs/spec/financial-explain.md §4.4.2, D-38). 코드가 만든 사실표와 신호 참조뿐이고,
  * 원천 행·분기 시계열·공시번호·내부 ID는 없다. 그대로 직렬화해 AI에 주고 {@code analysis.input_json}에도 저장한다.
  *
  * <p>D-54: 신호·묶음의 {@code section}과 {@link #sectionFacts}로 "어느 섹션에서 무엇을 쓸지"를 코드가 정한다.
@@ -19,7 +19,7 @@ import java.util.Map;
  *
  * <p>D-59(fx-input-6): 사람이 읽는 표시 문자열({@link Fact#name() 대신 있던} {@code display}, {@link PeriodLabel}의
  * {@code label})을 뺐다. 첫 시도에서 이 문자열을 그대로 옮겨 쓰는(토큰 대신 숫자·기간을 글자로 복사하는) 문제가
- * 반복되어(implementation-plan.md §7.4.30·§7.4.33), AI가 볼 필요 없는 표시 문구를 입력에서 없앤다 — 렌더러가
+ * 반복되어(docs/work/3-4-verification-2.md §7.4.30·§7.4.33), AI가 볼 필요 없는 표시 문구를 입력에서 없앤다 — 렌더러가
  * 이미 조사·부호·서식을 만들므로(D-56) AI는 표시 값을 몰라도 된다. {@link PeriodLabel}은 대신 {@code kind}
  * (QUARTER·ANNUAL)를 준다.
  */

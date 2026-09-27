@@ -33,7 +33,7 @@ DART_API_KEY: 발급받은키
 - 다른 위치의 파일을 쓰려면 환경 변수 `STOCKINSIGHT_SECRETS`에 경로를 지정한다.
 - 같은 이름의 환경 변수(`DART_API_KEY` 등)가 있으면 파일보다 우선한다. 한 번만 다른 키로 실행해 볼 때 쓴다.
 - 운영 서버는 `/etc/stockinsight/secrets.yml`(소유자만 읽기)을 쓰고, 파일이 없으면 기동하지 않는다.
-- `secrets*.yml`, `.env*`는 `.gitignore`에 있고, CI는 gitleaks로 커밋 이력을 검사한다. 커밋 전에 로컬에서도 검사하려면 [gitleaks](https://github.com/gitleaks/gitleaks)를 설치해 `gitleaks git`을 실행한다. [.gitleaks.toml](.gitleaks.toml)은 기본 규칙에 Anthropic 키 규칙을 더하고, 확인된 오탐만 값 형식 단위로 허용한다(CI와 같은 gitleaks 8.24.3 기준, [코드 가이드 §14](docs/code-guide.md#14-테스트-구조)).
+- `secrets*.yml`, `.env*`는 `.gitignore`에 있고, CI는 gitleaks로 커밋 이력을 검사한다. 커밋 전에 로컬에서도 검사하려면 [gitleaks](https://github.com/gitleaks/gitleaks)를 설치해 `gitleaks git`을 실행한다. [.gitleaks.toml](.gitleaks.toml)은 기본 규칙에 Anthropic 키 규칙을 더하고, 확인된 오탐만 값 형식 단위로 허용한다(CI와 같은 gitleaks 8.24.3 기준, [코드 가이드 §14](docs/code-guide/README.md#14-테스트-구조)).
 - 키가 노출되면 git 이력을 지우는 것으로는 부족하다. 즉시 재발급한다.
 
 ### OpenDART 수집
@@ -75,9 +75,11 @@ DART_API_KEY: 발급받은키
 
 ## 설계 문서
 
+문서의 입구는 [docs/README.md](docs/README.md)(문서 지도)다. 작업별로 읽을 파일과 새 내용을 쓰는 규칙이 거기 있다.
+
+- [진행 현황](docs/status.md) — 단계별 현황, 판단 대기, 작업 문서 목록 (작업 시작 때 먼저 읽는다)
 - [제품 정의](docs/product.md) — 제품의 목적, 대상 사용자, 핵심 개념, 원칙, 기능 판단 기준
 - [시스템 설계](docs/architecture.md) — 아키텍처, 기술 선택, 데이터, 보안, 운영, MVP 범위, 확장 방향, 제외 기능
-- [데이터·AI 분석 명세](docs/ai-analysis.md) — 기업 신호, 분석 종류(향후 전망 포함), 지문·재생성, 검증, 비용
-- [설계 결정 기록](docs/decisions.md) — 주요 설계 결정과 이유
-- [구현 계획](docs/implementation-plan.md) — 진행 현황과 다음 단계 작업 계획
-- [코드 분석 가이드](docs/code-guide.md) — 현재 코드의 구조, 기동·실행 흐름, 설정·데이터 흐름, 실행 특성 (코드와 함께 갱신)
+- [명세](docs/README.md) — 기업 신호, 재무 지표, 재무 쉬운 설명 등 분석 종류별 규칙
+- [설계 결정 기록](docs/decisions/README.md) — 결정 목록(원문은 번호 구간 파일)
+- [코드 분석 가이드](docs/code-guide/README.md) — 현재 코드의 구조, 기동·실행 흐름, 설정·데이터 흐름, 실행 특성 (코드와 함께 갱신)

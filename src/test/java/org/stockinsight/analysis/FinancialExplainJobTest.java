@@ -30,7 +30,7 @@ import org.stockinsight.signal.FinancialSignalJob;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
- * 재무 쉬운 설명 동기화 작업을 검증한다(ai-analysis.md §6.1). 실제 LLM 대신 {@link FakeLlmClient}를 쓴다.
+ * 재무 쉬운 설명 동기화 작업을 검증한다(docs/spec/analyses.md §6.1). 실제 LLM 대신 {@link FakeLlmClient}를 쓴다.
  */
 @SpringBootTest(properties = "app.analysis.financial-explain.publish=true")
 @Import({TestcontainersConfiguration.class, FinancialExplainJobTest.FakeLlmConfig.class})

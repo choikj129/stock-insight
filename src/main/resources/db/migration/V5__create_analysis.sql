@@ -1,4 +1,4 @@
--- AI 분석 결과 (docs/implementation-plan.md §7, D-38, D-39, D-40, architecture.md §4.2)
+-- AI 분석 결과 (docs/work/3-4-financial-explain.md §7, D-38, D-39, D-40, architecture.md §4.2)
 
 create table analysis (
     id                   bigint generated always as identity primary key,
@@ -30,7 +30,7 @@ comment on column analysis.target_type is 'COMPANY (경쟁사 쌍 등은 나중�
 comment on column analysis.target_key is '대상 식별자. COMPANY는 company.id 문자열';
 comment on column analysis.analysis_kind is 'financial_explain (다른 분석 종류는 나중에 추가)';
 comment on column analysis.fingerprint is '입력에 쓴 원천 식별자 집합의 해시(D-40). 값 해시가 아니다(D-08)';
-comment on column analysis.status is 'DRAFT, PUBLISHED, REJECTED, FAILED, HIDDEN (ai-analysis.md §6.3)';
+comment on column analysis.status is 'DRAFT, PUBLISHED, REJECTED, FAILED, HIDDEN (docs/spec/analyses.md §6.3)';
 comment on column analysis.result_json is 'AI 출력 그대로(토큰 포함). 실패·거절이면 null일 수 있다';
 comment on column analysis.input_json is 'AI에 준 입력 전체(공개 재무 수치만, 재현·감사용)';
 comment on column analysis.value_snapshot is '자리표시자 → 값(표시 값·원값·단위·기간·출처)의 렌더링용 스냅샷';

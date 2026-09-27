@@ -6,7 +6,7 @@ import java.util.List;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * 재무 쉬운 설명 동기화 설정(ai-analysis.md §6).
+ * 재무 쉬운 설명 동기화 설정(docs/spec/analyses.md §6).
  *
  * @param cron               실행 시각. 재무 신호 계산(07:00) 뒤
  * @param runOnStartup       앱 기동 직후 한 번 실행한다 (수동 확인용)

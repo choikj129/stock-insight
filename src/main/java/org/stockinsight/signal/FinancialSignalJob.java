@@ -22,7 +22,7 @@ import org.stockinsight.ingest.checkpoint.IngestCheckpoint;
 import org.stockinsight.ingest.checkpoint.IngestCheckpointRepository;
 
 /**
- * 재무 신호 계산 (docs/implementation-plan.md §6, architecture.md §4.4). 재무가 바뀐 기업만 다시 판정한다.
+ * 재무 신호 계산 (docs/work/3-collection-signals.md §6, architecture.md §4.4). 재무가 바뀐 기업만 다시 판정한다.
  * 체크포인트 원천 버전 = "규칙 버전:그 기업 재무 보고서의 마지막 변경 시각". 입력은 DB 값뿐이고 외부 호출이 없다.
  */
 @Component

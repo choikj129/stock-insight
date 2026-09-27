@@ -1,6 +1,6 @@
 package org.stockinsight.analysis;
 
-/** 분석 결과 상태 (ai-analysis.md §6.3). */
+/** 분석 결과 상태 (docs/spec/analyses.md §6.3). */
 public enum AnalysisStatus {
     /** 관리자 미리보기용, 게시되지 않는다. */
     DRAFT,

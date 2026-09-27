@@ -116,7 +116,7 @@ class FinancialExplainPromptTest {
                 .contains("글자로 \"흑자\"·\"적자\"·\"손실\"·\"손해\"를 쓰지 않는다");
     }
 
-    // ---- D-58·D-59: 배지·지표 결합, "로" 잇기 금지, 절 단위 방향, 표시 값 없는 입력 (implementation-plan.md §7.4.33) ----
+    // ---- D-58·D-59: 배지·지표 결합, "로" 잇기 금지, 절 단위 방향, 표시 값 없는 입력 (docs/work/3-4-verification-2.md §7.4.33) ----
 
     @Test
     void versionIsFxV13() {

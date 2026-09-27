@@ -5,9 +5,9 @@ import java.math.BigDecimal;
 import org.stockinsight.financial.FinancialRatios;
 
 /**
- * 재무 신호 판정 문턱값·심각도 구간 (D-35, ai-analysis.md §3.7). 초기값의 근거는 2026-09-25 로컬 데이터 분포다
- * (implementation-plan.md §6.1·§6.3). 값을 바꾸면 {@link #RULE_VERSION}도 올린다.
- * 매출 기준값은 재무 쉬운 설명(`analysis`)의 사실표 계산과 같은 값을 쓰도록 {@link FinancialRatios}를 참조한다(한 곳에서 정의, implementation-plan.md §7.2).
+ * 재무 신호 판정 문턱값·심각도 구간 (D-35, docs/spec/signals-financial.md §3.7). 초기값의 근거는 2026-09-25 로컬 데이터 분포다
+ * (docs/work/3-collection-signals.md §6.1·§6.3). 값을 바꾸면 {@link #RULE_VERSION}도 올린다.
+ * 매출 기준값은 재무 쉬운 설명(`analysis`)의 사실표 계산과 같은 값을 쓰도록 {@link FinancialRatios}를 참조한다(한 곳에서 정의, docs/work/3-4-financial-explain.md §7.2).
  */
 public final class FinancialRuleCatalog {
 

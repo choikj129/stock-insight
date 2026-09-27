@@ -41,7 +41,7 @@ import org.stockinsight.ingest.dart.DartApiException;
 import org.stockinsight.ingest.dart.DartKeyAccount;
 
 /**
- * 재무 수집 (docs/implementation-plan.md §4). 다중회사 주요계정(fnlttMultiAcnt)을 (bsns_year, report_code) ×
+ * 재무 수집 (docs/work/3-collection-signals.md §4). 다중회사 주요계정(fnlttMultiAcnt)을 (bsns_year, report_code) ×
  * 기업 100개 묶음으로 받는다.
  * <ol>
  *     <li>계기: 정기공시(원 공시·정정 모두)의 보고서명에서 조회 키를 계산해 그 기업·기간을 다시 받는다.</li>

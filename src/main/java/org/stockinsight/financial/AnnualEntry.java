@@ -2,7 +2,7 @@ package org.stockinsight.financial;
 
 import java.time.LocalDate;
 
-/** 연간 시계열의 한 사업연도. 사업보고서 한 벌에서 온다(ai-analysis.md §3.6). */
+/** 연간 시계열의 한 사업연도. 사업보고서 한 벌에서 온다(docs/spec/signals-financial.md §3.6). */
 public record AnnualEntry(
         LocalDate fiscalYearStart,
         LocalDate periodEnd,

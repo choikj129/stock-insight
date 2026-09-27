@@ -1,6 +1,6 @@
 package org.stockinsight.signal;
 
-/** 신호 유형 코드 (D-35, ai-analysis.md §3.7). */
+/** 신호 유형 코드 (D-35, docs/spec/signals-financial.md §3.7). */
 public enum SignalType {
     FIN_REVENUE_CHANGE,
     FIN_OPERATING_MARGIN_CHANGE,

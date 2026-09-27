@@ -18,7 +18,7 @@ import tools.jackson.databind.json.JsonMapper;
 
 /**
  * 골든셋 12개사의 고정 입력(src/test/resources/golden/financial_explain)이 D-54 보완·D-55 입력 계약을 지키는지 확인한다
- * (implementation-plan.md §7.4.26 점검표 1~6·20~22, §7.4.28). 입력 구성기를 바꾸면 GoldenSetDumpRunner로 fixture를
+ * (docs/work/3-4-verification-2.md §7.4.26 점검표 1~6·20~22, §7.4.28). 입력 구성기를 바꾸면 GoldenSetDumpRunner로 fixture를
  * 다시 만들고 이 테스트로 계약을 점검한다. DB·외부 호출 없이 파일만 읽는다.
  */
 class FinancialExplainGoldenContractTest {

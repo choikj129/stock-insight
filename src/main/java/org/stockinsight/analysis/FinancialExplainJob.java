@@ -28,7 +28,7 @@ import tools.jackson.core.JacksonException;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
- * 재무 쉬운 설명 동기화(ai-analysis.md §6.1). 재무 신호 계산 뒤 실행한다. 대상마다 지문을 계산해 건너뜀·재시도를
+ * 재무 쉬운 설명 동기화(docs/spec/analyses.md §6.1). 재무 신호 계산 뒤 실행한다. 대상마다 지문을 계산해 건너뜀·재시도를
  * 판단하고, 필요하면 AI를 호출해 검증한 뒤 초안으로 저장한다({@code app.analysis.financial-explain.publish}가
  * true일 때만 게시본으로 승격한다. D-39, §4.4.8).
  */

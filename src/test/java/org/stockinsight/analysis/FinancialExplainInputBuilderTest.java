@@ -20,7 +20,7 @@ import org.stockinsight.financial.RawAccountLine;
 import org.stockinsight.signal.FinancialRuleCatalog;
 import org.stockinsight.signal.FinancialSignalJob;
 
-/** 재무 쉬운 설명 입력 구성을 검증한다(D-38, ai-analysis.md §4.4.2). */
+/** 재무 쉬운 설명 입력 구성을 검증한다(D-38, docs/spec/financial-explain.md §4.4.2). */
 @SpringBootTest
 @Import(TestcontainersConfiguration.class)
 class FinancialExplainInputBuilderTest {
@@ -139,7 +139,7 @@ class FinancialExplainInputBuilderTest {
     void generalFormatWithMissingRevenueAccountAddsRevenueToDoNotMention() {
         // 2715(셀레스트라) 실제 사례 재현: GENERAL 포맷인데 매출 계정 자체가 없다. doNotMention은 이전에
         // FINANCIAL 포맷일 때만 "매출"을 자동으로 넣어, 같은 "매출 언급 금지" 상황인데 GENERAL 포맷은
-        // unavailable에만 들어가고 doNotMention에는 빠지는 비대칭이 있었다(implementation-plan.md §7.4.9, D-51).
+        // unavailable에만 들어가고 doNotMention에는 빠지는 비대칭이 있었다(docs/work/3-4-verification-1.md §7.4.9, D-51).
         List<RawAccountLine> rows = List.of(
                 line("BS", "유동자산", "1", "2026.03.31 현재", "3,000,000,000", "2,500,000,000"),
                 line("BS", "자산총계", "5", "2026.03.31 현재", "9,000,000,000", "8,000,000,000"),
@@ -257,7 +257,7 @@ class FinancialExplainInputBuilderTest {
     void pastSignalPeriodIsLabeledEvenWithoutOwnFacts() {
         // 2906(KT나스미디어) 실제 사례 재현: 최신 기간도 사업연도 대표 기간도 아닌 과거 분기의 이력 신호는 그
         // 기간에 등록된 사실이 없다. 신호를 만들 때 그 기간에 라벨을 붙이지 않으면 프롬프트가 시키는 "지난
-        // {per.기간}에는 {sig.S}…" 패턴을 쓸 토큰 자체가 없어져 규칙 2 실패로 이어진다(implementation-plan.md §7.4.7).
+        // {per.기간}에는 {sig.S}…" 패턴을 쓸 토큰 자체가 없어져 규칙 2 실패로 이어진다(docs/work/3-4-verification-1.md §7.4.7).
         // 실제 계산기 문턱값에 기대지 않고 company_signal에 직접 넣어 "사실 없는 과거 분기 신호" 상황만 재현한다.
         seedGeneralQuarter("11013", "2026.01.01 ~ 2026.03.31", "2026.03.31 현재", "1,000,000,000", "1,000,000,000", "R1");
         signalJob.run();
@@ -462,7 +462,7 @@ class FinancialExplainInputBuilderTest {
         assertThat(result.snapshot().periodLabels().values()).anySatisfy(label -> assertThat(label).contains("회계연도"));
     }
 
-    // ---- D-54 보완·D-55: 모든 섹션 배정, 상태·전환 사실, 관계 항목 (implementation-plan.md §7.4.26·§7.4.27 점검표) ----
+    // ---- D-54 보완·D-55: 모든 섹션 배정, 상태·전환 사실, 관계 항목 (docs/work/3-4-verification-2.md §7.4.26·§7.4.27 점검표) ----
 
     private static final String H1 = "2026.01.01 ~ 2026.06.30";
     private static final String H1_END = "2026.06.30 현재";
@@ -685,7 +685,7 @@ class FinancialExplainInputBuilderTest {
         assertThat(input.facts()).anyMatch(f -> f.key().equals("fin.operating_income.2025-01.Q4")); // 연간 흐름은 영업이익으로
     }
 
-    // ---- D-59: 표시 값·라벨 제거, 사실 이름의 방향, 12개월이 아닌 회계연도 제외 (implementation-plan.md §7.4.33) ----
+    // ---- D-59: 표시 값·라벨 제거, 사실 이름의 방향, 12개월이 아닌 회계연도 제외 (docs/work/3-4-verification-2.md §7.4.33) ----
 
     @Test
     void revenueYoyNameRevealsDecreaseNotAlwaysIncrease() {

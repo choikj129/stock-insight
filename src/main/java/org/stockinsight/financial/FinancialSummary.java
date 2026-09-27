@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 /**
- * 기업 하나의 재무 요약(ai-analysis.md §3.8). 시계열 기준(연결/별도)·통화는 최신 기간 기준으로 고정한다(D-37).
+ * 기업 하나의 재무 요약(docs/spec/signals-financial.md §3.8). 시계열 기준(연결/별도)·통화는 최신 기간 기준으로 고정한다(D-37).
  * 신호 계산과 (향후) 화면·AI 입력이 이 구조를 함께 쓴다. 신호 자체는 포함하지 않는다(signal 패키지가 이 요약으로 계산한다).
  *
  * @param basis            CFS 또는 OFS. 최신 기간에 연결이 있으면 연결

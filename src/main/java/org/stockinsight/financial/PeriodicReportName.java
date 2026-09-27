@@ -6,7 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * 정기공시 보고서명(disclosure.base_report_name)에서 재무 수집 조회 키를 계산한다 (docs/implementation-plan.md §4.3).
+ * 정기공시 보고서명(disclosure.base_report_name)에서 재무 수집 조회 키를 계산한다 (docs/work/3-collection-signals.md §4.3).
  * <ul>
  *     <li>"사업보고서 (YYYY.MM)" → (YYYY, 사업보고서)</li>
  *     <li>"반기보고서 (YYYY.MM)" → (YYYY, 반기보고서)</li>

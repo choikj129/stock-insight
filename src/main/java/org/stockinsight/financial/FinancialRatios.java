@@ -7,15 +7,15 @@ import java.time.temporal.ChronoUnit;
 
 /**
  * 재무 비율 계산과 그 기준값. 신호 계산기(`signal`)와 AI 입력 사실표(`analysis`)가 같은 코드를 써서
- * 두 곳의 숫자가 어긋나지 않게 한다(D-38, implementation-plan.md §7.2).
+ * 두 곳의 숫자가 어긋나지 않게 한다(D-38, docs/work/3-4-financial-explain.md §7.2).
  */
 public final class FinancialRatios {
 
-    /** 매출 비교 기준값: 분기 10억, 연간 40억 (미만이면 증가율을 계산하지 않는다). ai-analysis.md §3.6, §3.7. */
+    /** 매출 비교 기준값: 분기 10억, 연간 40억 (미만이면 증가율을 계산하지 않는다). docs/spec/signals-financial.md §3.6, §3.7. */
     public static final BigDecimal REVENUE_BASE_QUARTER = new BigDecimal("1000000000");
     public static final BigDecimal REVENUE_BASE_ANNUAL = new BigDecimal("4000000000");
 
-    /** 재무상태표 항등식(자산 = 부채 + 자본) 허용 오차(비율). ai-analysis.md §3.6. */
+    /** 재무상태표 항등식(자산 = 부채 + 자본) 허용 오차(비율). docs/spec/signals-financial.md §3.6. */
     public static final BigDecimal BALANCE_TOLERANCE = new BigDecimal("0.005");
 
     private FinancialRatios() {
