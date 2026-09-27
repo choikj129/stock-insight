@@ -1,6 +1,6 @@
 # 제품 목적 대비 설계 공백 점검 — D-65 기준
 
-> 후속 (2026-09-27): 후보 1·2·4는 [D-66·D-67·D-68](../decisions/README.md)로 범위를 확정했다([범위 설계](disclosure-prelim-trading-scope.md)). 후보 3과 §4는 아직 결정 전이다.
+> 후속 (2026-09-27): 후보 1·2·4는 [D-66·D-67·D-68](../decisions/README.md)로 범위를 확정했다([범위 설계](disclosure-prelim-trading-scope.md)). 후보 3은 [D-69](../decisions/README.md)로 확정했다([주주 관점 정보 범위 검토](shareholder-view-scope.md)). §4는 아직 결정 전이다.
 
 작성일: 2026-09-27 · 성격: **검토 문서(결정 전).** 코드·화면·데이터 수집·계산·테스트는 바꾸지 않았다. decisions/README.md에도 새 결정을 넣지 않았다. 아래 "결정 후보"는 사용자가 검토한 뒤 D-번호를 받는다.
 
