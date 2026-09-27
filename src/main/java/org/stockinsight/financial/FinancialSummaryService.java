@@ -12,7 +12,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import org.stockinsight.financial.AccountMapper.MappedAccounts;
 
@@ -34,7 +33,10 @@ public class FinancialSummaryService {
         this.repository = repository;
     }
 
-    @Transactional(readOnly = true)
+    // 단건성 조회 하나뿐이라 별도 트랜잭션을 열지 않는다 — repository는 JdbcClient 기반이라 Spring Data JPA처럼
+    // 메서드 단위로 스스로 트랜잭션을 관리하지 않지만, 이 메서드는 findAllByCompany 한 번만 부르고 끝나(단일 SELECT)
+    // 트랜잭션으로 묶어 얻는 이득이 없다. 여러 조회를 한 트랜잭션으로 묶어야 하는 FinancialExplainInputBuilder.build()
+    // 같은 경우와 다르다. FinancialSignalJob처럼 이미 트랜잭션 안에서 부르면 그 트랜잭션을 그대로 쓴다.
     public FinancialSummary summarize(long companyId) {
         List<StoredFinancialReport> reports = repository.findAllByCompany(companyId);
         if (reports.isEmpty()) {
